@@ -1,0 +1,10 @@
+release/gtest-all.o
+release/gmock-all.o
+release/TableModelTest.o
+release/main.o
+release/textAlignmentButtons.o
+release/cell.o
+release/tablemodel.o
+release/window.o
+release/moc_tablemodel.o
+release/moc_window.o
