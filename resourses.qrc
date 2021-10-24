@@ -1,0 +1,21 @@
+<RCC>
+    <qresource prefix="/">
+        <file>icons/ColorChooseIcon.png</file>
+        <file>icons/tableColumnAddition.png</file>
+        <file>icons/tableColumnRemoval.png</file>
+        <file>icons/tableRowAddition.png</file>
+        <file>icons/tableRowRemoval.png</file>
+        <file>icons/textAlignmentDown.png</file>
+        <file>icons/textAlignmentHCenter.png</file>
+        <file>icons/textAlignmentLeft.png</file>
+        <file>icons/textAlignmentRight.png</file>
+        <file>icons/textAlignmentUp.png</file>
+        <file>icons/textAlignmentVCenter.png</file>
+        <file>icons/TextColorChooseIcon.png</file>
+        <file>icons/WinIcon.png</file>
+        <file>icons/fontDialog.png</file>
+        <file>icons/boldFont.png</file>
+        <file>icons/italicsFont.png</file>
+        <file>icons/strikethroughFont.png</file>
+    </qresource>
+</RCC>
