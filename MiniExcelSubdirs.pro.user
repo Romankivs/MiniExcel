@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 5.0.1, 2021-10-20T22:32:30. -->
+<!-- Written by QtCreator 5.0.1, 2021-10-24T17:05:45. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -68,12 +68,12 @@
     <value type="bool" key="AutoTest.Framework.QtTest">true</value>
    </valuemap>
    <valuemap type="QVariantMap" key="AutoTest.CheckStates">
-    <value type="Qt::CheckState" key="1@C:/Users/forus/qt/MiniExcelUnit/TableModelTest.cpp:TableModelTest">Checked</value>
-    <value type="Qt::CheckState" key="1@C:/Users/forus/qt/MiniExcelUnit/TableModelTest.cpp:columnCountHandleEmptyTable">Checked</value>
-    <value type="Qt::CheckState" key="1@C:/Users/forus/qt/MiniExcelUnit/TableModelTest.cpp:columnCountHandleNonEmptyTable">Checked</value>
-    <value type="Qt::CheckState" key="1@C:/Users/forus/qt/MiniExcelUnit/TableModelTest.cpp:rowCountHandleEmptyTable">Checked</value>
-    <value type="Qt::CheckState" key="1@C:/Users/forus/qt/MiniExcelUnit/TableModelTest.cpp:rowCountHandleNonEmptyTable">Checked</value>
-    <value type="Qt::CheckState" key="1@C:/Users/forus/qt/MiniExcelUnit/TableModelTest.cpp:saveAndLoadToFile">Checked</value>
+    <value type="Qt::CheckState" key="1@C:/Users/forus/qt/MiniExcelSubdirs/MiniExcelUnit/TableModelTest.cpp:TableModelTest">Checked</value>
+    <value type="Qt::CheckState" key="1@C:/Users/forus/qt/MiniExcelSubdirs/MiniExcelUnit/TableModelTest.cpp:columnCountHandleEmptyTable">Checked</value>
+    <value type="Qt::CheckState" key="1@C:/Users/forus/qt/MiniExcelSubdirs/MiniExcelUnit/TableModelTest.cpp:columnCountHandleNonEmptyTable">Checked</value>
+    <value type="Qt::CheckState" key="1@C:/Users/forus/qt/MiniExcelSubdirs/MiniExcelUnit/TableModelTest.cpp:rowCountHandleEmptyTable">Checked</value>
+    <value type="Qt::CheckState" key="1@C:/Users/forus/qt/MiniExcelSubdirs/MiniExcelUnit/TableModelTest.cpp:rowCountHandleNonEmptyTable">Checked</value>
+    <value type="Qt::CheckState" key="1@C:/Users/forus/qt/MiniExcelSubdirs/MiniExcelUnit/TableModelTest.cpp:saveAndLoadToFile">Checked</value>
    </valuemap>
    <value type="int" key="AutoTest.RunAfterBuild">0</value>
    <value type="bool" key="AutoTest.UseGlobal">true</value>
@@ -244,14 +244,14 @@
     <valuelist type="QVariantList" key="CustomOutputParsers"/>
     <value type="int" key="PE.EnvironmentAspect.Base">2</value>
     <valuelist type="QVariantList" key="PE.EnvironmentAspect.Changes"/>
-    <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">Qt4ProjectManager.Qt4RunConfiguration:C:/Users/forus/qt/MiniExcel/testing.pro</value>
-    <value type="QString" key="ProjectExplorer.RunConfiguration.BuildKey">C:/Users/forus/qt/MiniExcel/testing.pro</value>
+    <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">Qt4ProjectManager.Qt4RunConfiguration:C:/Users/forus/qt/MiniExcelSubdirs/MiniExcel/testing.pro</value>
+    <value type="QString" key="ProjectExplorer.RunConfiguration.BuildKey">C:/Users/forus/qt/MiniExcelSubdirs/MiniExcel/testing.pro</value>
     <value type="bool" key="RunConfiguration.UseCppDebugger">false</value>
     <value type="bool" key="RunConfiguration.UseCppDebuggerAuto">true</value>
     <value type="bool" key="RunConfiguration.UseLibrarySearchPath">true</value>
     <value type="bool" key="RunConfiguration.UseQmlDebugger">false</value>
     <value type="bool" key="RunConfiguration.UseQmlDebuggerAuto">true</value>
-    <value type="QString" key="RunConfiguration.WorkingDirectory.default">C:/Users/forus/qt/MiniExcel</value>
+    <value type="QString" key="RunConfiguration.WorkingDirectory.default">C:/Users/forus/qt/build-MiniExcelSubdirs-Desktop_Qt_6_1_3_MinGW_64_bit-Debug/MiniExcel</value>
    </valuemap>
    <valuemap type="QVariantMap" key="ProjectExplorer.Target.RunConfiguration.1">
     <value type="bool" key="Analyzer.Perf.Settings.UseGlobalSettings">true</value>
@@ -260,14 +260,14 @@
     <valuelist type="QVariantList" key="CustomOutputParsers"/>
     <value type="int" key="PE.EnvironmentAspect.Base">2</value>
     <valuelist type="QVariantList" key="PE.EnvironmentAspect.Changes"/>
-    <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">Qt4ProjectManager.Qt4RunConfiguration:C:/Users/forus/qt/MiniExcelUnit/MiniExcelUnit.pro</value>
-    <value type="QString" key="ProjectExplorer.RunConfiguration.BuildKey">C:/Users/forus/qt/MiniExcelUnit/MiniExcelUnit.pro</value>
+    <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">Qt4ProjectManager.Qt4RunConfiguration:C:/Users/forus/qt/MiniExcelSubdirs/MiniExcelUnit/MiniExcelUnit.pro</value>
+    <value type="QString" key="ProjectExplorer.RunConfiguration.BuildKey">C:/Users/forus/qt/MiniExcelSubdirs/MiniExcelUnit/MiniExcelUnit.pro</value>
     <value type="bool" key="RunConfiguration.UseCppDebugger">false</value>
     <value type="bool" key="RunConfiguration.UseCppDebuggerAuto">true</value>
     <value type="bool" key="RunConfiguration.UseLibrarySearchPath">true</value>
     <value type="bool" key="RunConfiguration.UseQmlDebugger">false</value>
     <value type="bool" key="RunConfiguration.UseQmlDebuggerAuto">true</value>
-    <value type="QString" key="RunConfiguration.WorkingDirectory.default">C:/Users/forus/qt/MiniExcelUnit</value>
+    <value type="QString" key="RunConfiguration.WorkingDirectory.default">C:/Users/forus/qt/build-MiniExcelSubdirs-Desktop_Qt_6_1_3_MinGW_64_bit-Debug/MiniExcelUnit</value>
    </valuemap>
    <value type="int" key="ProjectExplorer.Target.RunConfigurationCount">2</value>
   </valuemap>
