@@ -1,8 +1,6 @@
 #include <QApplication>
 #include <QTableView>
-#include <QHeaderView>
 #include "window.h"
-#include "tablemodel.h"
 
 int main(int argc, char **argv)
 {

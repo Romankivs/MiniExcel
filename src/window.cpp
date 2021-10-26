@@ -1,4 +1,8 @@
 #include "window.h"
+#include <antlr4-runtime.h>
+#include <CellExpressionLexer.h>
+#include <CellExpressionParser.h>
+#include "CellFormulaVisitor.h"
 
 Window::Window()
 {
@@ -19,6 +23,14 @@ Window::Window()
 
     createActions();
     createToolBars();
+
+    antlr4::ANTLRInputStream input(std::string("mmax(3,5,(10-44)) + 3^+4"));
+    antlr4::CellExpressionLexer lexer(&input);
+    antlr4::CommonTokenStream tokens(&lexer);
+    antlr4::CellExpressionParser parser(&tokens);
+    CellFormulaVisitor visitor;
+    double result = visitor.visit(parser.start());
+    QMessageBox::warning(this, "Warning", QString::number(result));
 }
 
 Window::~Window()
@@ -211,7 +223,7 @@ void Window::removeRows()
         QModelIndexList selectedRows = tableView->selectionModel()->selectedIndexes();
         QModelIndexList::iterator last = std::unique(selectedRows.begin(), selectedRows.end(),
                                [](const QModelIndex& a, const QModelIndex& b){ return a.row() == b.row();});
-        selectedRows.erase(last, selectedRows.cend());
+        selectedRows.erase(last, selectedRows.end());
         std::sort(selectedRows.begin(), selectedRows.end(), [](const QModelIndex& a, const QModelIndex& b) { return a.row() < b.row();});
         tableModel->removeRows(selectedRows.constFirst().row(), selectedRows.size());
     }

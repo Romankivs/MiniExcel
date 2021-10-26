@@ -8,16 +8,32 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(QT NAMES Qt6 Qt5 COMPONENTS Widgets REQUIRED)
+find_package(QT NAMES Qt6 COMPONENTS Widgets REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Widgets REQUIRED)
+
+find_package(antlr4-runtime REQUIRED)
+find_package(antlr4-generator REQUIRED)
+
+# Set path to generator
+set(ANTLR4_JAR_LOCATION ${PROJECT_SOURCE_DIR}/third/antlr4/antlr-4.9.2-complete.jar)
 
 ADD_DEFINITIONS(-DQT_NO_KEYWORDS)
 
-set(SRC_DIR src)
-set(INCLUDE_DIR include)
+set(SRC_DIR ${PROJECT_SOURCE_DIR}/src)
+set(INCLUDE_DIR ${PROJECT_SOURCE_DIR}/include)
+
+# generate combined grammar
+antlr4_generate(
+        cellExpressionGrammar
+        ${SRC_DIR}/antlr4/CellExpression.g4
+        BOTH                                # combined grammar
+        FALSE                               # do not generate listener
+        TRUE                                # generate visitor
+        "antlr4"                            # namespace
+)
 
 add_subdirectory(third/googletest-master)
 add_subdirectory(test)
@@ -33,7 +49,7 @@ set(PROJECT_SOURCES
         ${SRC_DIR}/MainToolBar/textAlignmentButtons.cpp
         ${INCLUDE_DIR}/MainToolBar/textAlignmentButtons.h
         resourses.qrc
-)
+        ${ANTLR4_SRC_FILES_cellExpressionGrammar} src/CellFormulaVisitor.cpp include/CellFormulaVisitor.h)
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(MiniExcelCmake
@@ -58,9 +74,12 @@ else()
     endif()
 endif()
 
-target_link_libraries(MiniExcelCmake PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
+target_include_directories(MiniExcelCmake PUBLIC include ${ANTLR4_INCLUDE_DIR} ${ANTLR4_INCLUDE_DIR_cellExpressionGrammar})
 
-target_include_directories(MiniExcelCmake PUBLIC include)
+# add required runtime library
+add_dependencies(MiniExcelCmake antlr4_shared )
+
+target_link_libraries(MiniExcelCmake PRIVATE Qt${QT_VERSION_MAJOR}::Widgets antlr4_shared)
 
 set_target_properties(MiniExcelCmake PROPERTIES
     MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com
