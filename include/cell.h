@@ -9,21 +9,27 @@ class cell
 {
 public:
     cell() = default;
-    cell(QString textData, Qt::Alignment textAlignment, QFont font, QColor backgroundColor, QColor textColor);
+    cell(QString innerText, QString displayText, Qt::Alignment textAlignment, QFont font,
+         QColor backgroundColor, QColor textColor, bool isFormula);
     ~cell() = default;
     cell(const cell& other) = default;
     cell& operator=(const cell& other) = default;
     bool operator==(const cell& other) const
     {
-        return (textData == other.textData &&
+        return (innerText == other.innerText &&
+               displayText == other.displayText &&
                textAlignment == other.textAlignment &&
                font == other.font &&
                backgroundColor == other.backgroundColor &&
-               textColor == other.textColor);
+               textColor == other.textColor &&
+               isFormula == other.isFormula);
     }
 
-    const QString &getTextData() const;
-    void setTextData(const QString &newTextData);
+    const QString &getInnerText() const;
+    void setInnerText(const QString &newText);
+
+    const QString &getDisplayText() const;
+    void setDisplayText(const QString &newText);
 
     const QFont &getFont() const;
     void setFont(const QFont &newFont);
@@ -40,12 +46,17 @@ public:
     const Qt::Alignment &getTextAlignment() const;
     void setTextAlignment(const Qt::Alignment &newTextAlignment);
 
+    bool getIsFormula() const;
+    void setIsFormula(bool value);
+
 private:
-    QString textData;
+    QString innerText;
+    QString displayText;
     Qt::Alignment textAlignment = Qt::AlignLeft | Qt::AlignVCenter;
     QFont font;
     QColor backgroundColor = QColor(255, 255, 255);
     QColor textColor = QColor(0, 0, 0);
+    bool isFormula = false;
 };
 
 // Serialization functions

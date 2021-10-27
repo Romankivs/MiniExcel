@@ -6,11 +6,12 @@ grammar CellExpression;
 
 start: expr NEWLINE?;
 
-expr: op=(ADD|SUB) expr                              #UnaryMinOrPlus
-      |<assoc=right> left=expr POW right=expr     #Pow
+expr: op=(ADD|SUB) expr                            #UnaryMinOrPlus
+      |<assoc=right> left=expr POW right=expr      #Pow
       | left=expr op=(MUL|DIV) right=expr         #MulOrDiv
       | left=expr op=(ADD|SUB) right=expr         #AddOrSub
       | op=(MMAX|MMIN) '(' expr (','expr)*')'     #MmaxOrMmin
+      | CELL_NAME                                 #CellName
       | NUMBER                                    #Number
       | '(' inner=expr ')'                        #Paranthesis
       ;
@@ -27,6 +28,7 @@ DIV:  '/';
 ADD:  '+';
 SUB:  '-';
 NUMBER: (R_INT|R_FLOAT);
+CELL_NAME: [A-Z]+[0-9]*;
 
 fragment R_INT: DIGIT+;
 fragment R_FLOAT: DIGIT+'.'DIGIT*

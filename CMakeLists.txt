@@ -49,7 +49,7 @@ set(PROJECT_SOURCES
         ${SRC_DIR}/MainToolBar/textAlignmentButtons.cpp
         ${INCLUDE_DIR}/MainToolBar/textAlignmentButtons.h
         resourses.qrc
-        ${ANTLR4_SRC_FILES_cellExpressionGrammar} src/CellFormulaVisitor.cpp include/CellFormulaVisitor.h)
+        ${ANTLR4_SRC_FILES_cellExpressionGrammar} src/CellFormulaVisitor.cpp include/CellFormulaVisitor.h src/CellFormulaInterpreter.cpp include/CellFormulaInterpreter.h src/ExceptionCellExpressionListener.cpp include/ExceptionCellExpressionListener.h)
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(MiniExcelCmake

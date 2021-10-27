@@ -39,6 +39,7 @@ Q_SIGNALS:
     void currentFontIsBoldChanged(bool bold);
     void currentFontIsItalicChanged(bool italic);
     void currentFontIsStrikethroughChanged(bool strikethrough);
+    void currentIsFormulaChanged(bool formula);
 private Q_SLOTS:
     void verHeaderCustomContextMenu(const QPoint& point);
     void horHeaderCustomContextMenu(const QPoint& point);
@@ -46,6 +47,7 @@ private Q_SLOTS:
     void fontChangedFromComboBox(const QFont& font);
     void fontSizeChanged(int fontSize);
     void fontStyleChanged(FontStyleOptions style, bool value);
+    void isFormulaChanged(bool value);
 private:
     void save();
     void saveAs();

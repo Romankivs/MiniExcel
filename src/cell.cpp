@@ -1,19 +1,26 @@
 #include "cell.h"
 
-cell::cell(QString textData, Qt::Alignment textAlignment, QFont font, QColor backgroundColor, QColor textColor) :
-    textData(textData), textAlignment(textAlignment), font(font), backgroundColor(backgroundColor), textColor(textColor)
+cell::cell(QString innerText, QString displayText, Qt::Alignment textAlignment, QFont font, QColor backgroundColor, QColor textColor, bool isFormula) :
+    innerText(innerText), displayText(displayText), textAlignment(textAlignment), font(font), backgroundColor(backgroundColor), textColor(textColor),
+    isFormula(isFormula)
 {
 
 }
 
-const QString &cell::getTextData() const
-{
-    return textData;
+const QString &cell::getInnerText() const {
+    return innerText;
 }
 
-void cell::setTextData(const QString &newTextData)
-{
-    textData = newTextData;
+void cell::setInnerText(const QString &newText) {
+    innerText = newText;
+}
+
+const QString &cell::getDisplayText() const {
+    return displayText;
+}
+
+void cell::setDisplayText(const QString &newText) {
+    displayText = newText;
 }
 
 const QFont &cell::getFont() const
@@ -56,19 +63,32 @@ void cell::setTextAlignment(const Qt::Alignment &newTextAlignment)
     textAlignment = newTextAlignment;
 }
 
+bool cell::getIsFormula() const {
+    return isFormula;
+}
+
+void cell::setIsFormula(bool value) {
+    isFormula = value;
+}
+
 QDataStream& operator<<(QDataStream& stream, const cell& _cell)
 {
-    stream << _cell.getTextData() << _cell.getTextAlignment() <<_cell.getFont() << _cell.getBackgroundColor() << _cell.getTextColor();
+    stream << _cell.getInnerText() << _cell.getDisplayText() << _cell.getTextAlignment() <<_cell.getFont()
+        << _cell.getBackgroundColor() << _cell.getTextColor() << _cell.getIsFormula();
     return stream;
 }
+
 QDataStream& operator>>(QDataStream& stream, cell& _cell)
 {
-    QString textData;
+    QString innerText, displayText;
     Qt::Alignment textAlignment;
     QFont font;
     QColor backgroundColor, textColor;
-    stream >> textData >> textAlignment >> font >> backgroundColor >> textColor;
-    _cell = cell(textData, textAlignment, font, backgroundColor, textColor);
+    bool isFormula;
+    stream >> innerText >> displayText >> textAlignment >> font >> backgroundColor >> textColor >> isFormula;
+    _cell = cell(innerText, displayText, textAlignment, font, backgroundColor, textColor, isFormula);
     return stream;
 }
+
+
 

@@ -3,6 +3,7 @@
 #include <CellExpressionLexer.h>
 #include <CellExpressionParser.h>
 #include "CellFormulaVisitor.h"
+#include "ExceptionCellExpressionListener.h"
 
 Window::Window()
 {
@@ -24,13 +25,24 @@ Window::Window()
     createActions();
     createToolBars();
 
-    antlr4::ANTLRInputStream input(std::string("mmax(3,5,(10-44)) + 3^+4"));
+    antlr4::ANTLRInputStream input(std::string("1+3-"));
+    ExceptionCellExpressionListener errListener;
     antlr4::CellExpressionLexer lexer(&input);
+    lexer.removeErrorListeners();
+    lexer.addErrorListener(&errListener);
     antlr4::CommonTokenStream tokens(&lexer);
     antlr4::CellExpressionParser parser(&tokens);
-    CellFormulaVisitor visitor;
-    double result = visitor.visit(parser.start());
-    QMessageBox::warning(this, "Warning", QString::number(result));
+    parser.removeErrorListeners();
+    parser.addErrorListener(&errListener);
+    CellFormulaVisitor visitor(tableModel);
+    try {
+        double result = visitor.visit(parser.start());
+    }
+    catch (std::runtime_error e)
+    {
+        QMessageBox::warning(this, "Warning", e.what());
+    }
+    //QMessageBox::warning(this, "Warning", QString::number(result));
 }
 
 Window::~Window()
@@ -40,7 +52,7 @@ Window::~Window()
 
 void Window::verHeaderCustomContextMenu(const QPoint& point)
 {
-    QMenu* contextMenu = new QMenu("Rows", this);
+    auto* contextMenu = new QMenu("Rows", this);
     contextMenu->setAttribute(Qt::WA_DeleteOnClose);
     QAction* remRowAction = contextMenu->addAction(QIcon(":/icons/tableRowRemoval.png"), "Remove row");
     connect(remRowAction, &QAction::triggered, this, [point, this](){tableModel->removeRows(tableView->verticalHeader()->logicalIndexAt(point), 1);});
@@ -51,7 +63,7 @@ void Window::verHeaderCustomContextMenu(const QPoint& point)
 
 void Window::horHeaderCustomContextMenu(const QPoint& point)
 {
-    QMenu* contextMenu = new QMenu("Columns", this);
+    auto* contextMenu = new QMenu("Columns", this);
     contextMenu->setAttribute(Qt::WA_DeleteOnClose);
     QAction* remColAction = contextMenu->addAction(QIcon(":/icons/tableColumnRemoval.png"), "Remove column");
     connect(remColAction, &QAction::triggered, this, [point, this](){tableModel->removeColumns(tableView->horizontalHeader()->logicalIndexAt(point), 1);});
@@ -66,13 +78,15 @@ void Window::selectionChanged(const QItemSelection &selected, const QItemSelecti
     const QModelIndexList selectedIndexes = selected.indexes();
     if (selectedIndexes.isEmpty())
         return;
-    QModelIndex firstSelected = selectedIndexes.front();
-    QFont changedFont = tableModel->data(firstSelected, Qt::FontRole).value<QFont>();
+    QModelIndex lastSelected = selectedIndexes.back();
+    auto changedFont = tableModel->data(lastSelected, Qt::FontRole).value<QFont>();
     Q_EMIT currentFontChanged(changedFont);
     Q_EMIT currentFontSizeChanged(changedFont.pointSize());
     Q_EMIT currentFontIsBoldChanged(changedFont.bold());
     Q_EMIT currentFontIsItalicChanged(changedFont.italic());
     Q_EMIT currentFontIsStrikethroughChanged(changedFont.strikeOut());
+    bool changedIsFormula = tableModel->data(lastSelected, Qt::UserRole).value<bool>();
+    Q_EMIT currentIsFormulaChanged(changedIsFormula);
 }
 
 void Window::fontChangedFromComboBox(const QFont &font)
@@ -102,7 +116,7 @@ void Window::fontSizeChanged(int fontSize)
         QModelIndexList selectedTableIndexes = tableView->selectionModel()->selectedIndexes();
         for (const auto& index : selectedTableIndexes)
         {
-            QFont currentCellFont = tableModel->data(index, Qt::FontRole).value<QFont>();
+            auto currentCellFont = tableModel->data(index, Qt::FontRole).value<QFont>();
             currentCellFont.setPointSize(fontSize);
             tableModel->setData(index, currentCellFont, Qt::FontRole);
         }
@@ -120,7 +134,7 @@ void Window::fontStyleChanged(FontStyleOptions style, bool value)
         QModelIndexList selectedTableIndexes = tableView->selectionModel()->selectedIndexes();
         for (const auto& index : selectedTableIndexes)
         {
-            QFont currentCellFont = tableModel->data(index, Qt::FontRole).value<QFont>();
+            auto currentCellFont = tableModel->data(index, Qt::FontRole).value<QFont>();
             switch(style)
             {
             case FontStyleOptions::Bold:
@@ -136,6 +150,22 @@ void Window::fontStyleChanged(FontStyleOptions style, bool value)
                 break;
             }
             tableModel->setData(index, currentCellFont, Qt::FontRole);
+        }
+    }
+}
+
+void Window::isFormulaChanged(bool value)
+{
+    if (!tableView->selectionModel()->hasSelection())
+    {
+        QMessageBox::warning(this, "Warning", "No indexes were selected!");
+    }
+    else
+    {
+        QModelIndexList selectedTableIndexes = tableView->selectionModel()->selectedIndexes();
+        for (const auto& index : selectedTableIndexes)
+        {
+            tableModel->setData(index, value, Qt::UserRole);
         }
     }
 }
@@ -406,12 +436,12 @@ void Window::createColorToolButtons(QToolBar *toolBar)
 
 void Window::createTextAlignmentToolButtons(QToolBar *toolBar)
 {
-    QToolButton* horizontalTextAlignmentButton = new QToolButton;
+    auto* horizontalTextAlignmentButton = new QToolButton;
     horizontalTextAlignmentButton->setIcon(QIcon(":/icons/textAlignmentLeft.png"));
     horizontalTextAlignmentButton->setToolTip("Horizontal Text Alignment");
     toolBar->addWidget(horizontalTextAlignmentButton);
     horizontalTextAlignmentButton->setPopupMode(QToolButton::InstantPopup);
-    QMenu* horizontalTextAlignMenu = new QMenu(horizontalTextAlignmentButton);
+    auto* horizontalTextAlignMenu = new QMenu(horizontalTextAlignmentButton);
     horizontalTextAlignmentButton->setMenu(horizontalTextAlignMenu);
 
     QAction* alignLeft = horizontalTextAlignMenu->addAction(QIcon(":/icons/textAlignmentLeft.png"), "Left");
@@ -421,12 +451,12 @@ void Window::createTextAlignmentToolButtons(QToolBar *toolBar)
     QAction* alignRight = horizontalTextAlignMenu->addAction(QIcon(":/icons/textAlignmentRight.png"), "Right");
     connect(alignRight, &QAction::triggered, this, [this](){chooseHorizontalAlignment(Qt::AlignRight);});
 
-    QToolButton* verticalTextAlignmentButton = new QToolButton;
+    auto* verticalTextAlignmentButton = new QToolButton;
     verticalTextAlignmentButton->setIcon(QIcon(":/icons/textAlignmentUp.png"));
     verticalTextAlignmentButton->setToolTip("Vertical Text Alignment");
     toolBar->addWidget(verticalTextAlignmentButton);
     verticalTextAlignmentButton->setPopupMode(QToolButton::InstantPopup);
-    QMenu* verticalTextAlignMenu = new QMenu(verticalTextAlignmentButton);
+    auto* verticalTextAlignMenu = new QMenu(verticalTextAlignmentButton);
     verticalTextAlignmentButton->setMenu(verticalTextAlignMenu);
 
     QAction* alignUp = verticalTextAlignMenu->addAction(QIcon(":/icons/textAlignmentUp.png"), "Up");
@@ -444,13 +474,13 @@ void Window::createFontToolButtonsAndWidgets(QToolBar *toolBar)
     QAction* fontDialog = toolBar->addAction(QIcon(":/icons/fontDialog.png"), "Font Settings");
     connect(fontDialog, &QAction::triggered, this, [this](){changeFontDialog();});
 
-    QFontComboBox* fontBox = new QFontComboBox;
+    auto* fontBox = new QFontComboBox;
     connect(this, SIGNAL(currentFontChanged(QFont)), fontBox, SLOT(setCurrentFont(QFont)));
     connect(fontBox, &QComboBox::activated, this,
             [this, fontBox](int index){fontChangedFromComboBox(QFont(fontBox->itemText(index)));});
     toolBar->addWidget(fontBox);
 
-    QSpinBox* fontSizeSpinBox= new QSpinBox;
+    auto* fontSizeSpinBox= new QSpinBox;
     constexpr int minimalFontSize = 6;
     constexpr int maximumFontSize = 36;
     fontSizeSpinBox->setMinimum(minimalFontSize);
@@ -478,6 +508,11 @@ void Window::createFontToolButtonsAndWidgets(QToolBar *toolBar)
     strikethroughFont->setCheckable(true);
 
     toolBar->addSeparator();
+
+    QAction* formula = toolBar->addAction(QIcon(":/icons/formula.png"), "Formula");
+    connect(this, SIGNAL(currentIsFormulaChanged(bool)), formula, SLOT(setChecked(bool)));
+    connect(formula, &QAction::triggered, this, [this](bool value){isFormulaChanged(value);});
+    formula->setCheckable(true);
 }
 
 void Window::about()
@@ -485,3 +520,4 @@ void Window::about()
     QMessageBox::about(this, "About Application",
              "MiniExcel is a very simple table viewer and editor ");
 }
+

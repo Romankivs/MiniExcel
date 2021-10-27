@@ -1,11 +1,11 @@
 #include "tablemodel.h"
 
-TableModel::TableModel(QObject *parent) : QAbstractTableModel(parent)
+TableModel::TableModel(QObject *parent) : QAbstractTableModel(parent), formulaInterp(this)
 {
 }
 
 TableModel::TableModel(QVector<QVector<cell> > &tableData, QObject *parent) :
-    QAbstractTableModel(parent), tableData(tableData)
+    QAbstractTableModel(parent), tableData(tableData), formulaInterp(this)
 {
     int width;
     int height = tableData.size();
@@ -62,18 +62,22 @@ QVariant TableModel::data(const QModelIndex &index, int role) const
         return QVariant();
     switch(role)
     {
-    case Qt::DisplayRole:
-        return tableData[index.row()][index.column()].getTextData();
-    case Qt::BackgroundRole:
-        return tableData[index.row()][index.column()].getBackgroundColor();
-    case Qt::ForegroundRole:
-        return tableData[index.row()][index.column()].getTextColor();
-    case Qt::TextAlignmentRole:
-        return QVariant::fromValue(tableData[index.row()][index.column()].getTextAlignment());
-    case Qt::FontRole:
-        return tableData[index.row()][index.column()].getFont();
-    default:
-        return QVariant();
+        case Qt::DisplayRole:
+            return tableData[index.row()][index.column()].getDisplayText();
+        case Qt::EditRole:
+            return tableData[index.row()][index.column()].getInnerText();
+        case Qt::BackgroundRole:
+            return tableData[index.row()][index.column()].getBackgroundColor();
+        case Qt::ForegroundRole:
+            return tableData[index.row()][index.column()].getTextColor();
+        case Qt::TextAlignmentRole:
+            return QVariant::fromValue(tableData[index.row()][index.column()].getTextAlignment());
+        case Qt::FontRole:
+            return tableData[index.row()][index.column()].getFont();
+        case Qt::UserRole:
+            return tableData[index.row()][index.column()].getIsFormula();
+        default:
+            return QVariant();
     }
 }
 
@@ -104,28 +108,44 @@ bool TableModel::setData(const QModelIndex &index, const QVariant &value, int ro
         return false;
     switch(role)
     {
-    case Qt::EditRole:
-        tableData[index.row()][index.column()].setTextData(value.toString());
-        Q_EMIT dataChanged(index, index, {Qt::DisplayRole, Qt::EditRole});
-        return true;
-    case Qt::BackgroundRole:
-        tableData[index.row()][index.column()].setBackgroundColor(value.value<QColor>());
-        Q_EMIT dataChanged(index, index, {Qt::DisplayRole, Qt::BackgroundRole});
-        return true;
-    case Qt::ForegroundRole:
-        tableData[index.row()][index.column()].setTextColor(value.value<QColor>());
-        Q_EMIT dataChanged(index, index, {Qt::DisplayRole, Qt::ForegroundRole});
-        return true;
-    case Qt::TextAlignmentRole:
-        tableData[index.row()][index.column()].setTextAlignment(value.value<Qt::Alignment>());
-        Q_EMIT dataChanged(index, index, {Qt::DisplayRole, Qt::TextAlignmentRole});
-        return true;
-    case Qt::FontRole:
-        tableData[index.row()][index.column()].setFont(value.value<QFont>());
-        Q_EMIT dataChanged(index, index, {Qt::DisplayRole, Qt::FontRole});
-        return true;
-    default:
-        return false;
+        case Qt::EditRole:
+            if (tableData[index.row()][index.column()].getIsFormula())
+            {
+                QString valueToStr = value.toString();
+                tableData[index.row()][index.column()].setDisplayText(formulaInterp.interpret(valueToStr));
+            }
+            else
+                tableData[index.row()][index.column()].setDisplayText(value.toString());
+            tableData[index.row()][index.column()].setInnerText(value.toString());
+            Q_EMIT dataChanged(index, index, {Qt::DisplayRole, Qt::EditRole});
+            return true;
+        case Qt::BackgroundRole:
+            tableData[index.row()][index.column()].setBackgroundColor(value.value<QColor>());
+            Q_EMIT dataChanged(index, index, {Qt::DisplayRole, Qt::BackgroundRole});
+            return true;
+        case Qt::ForegroundRole:
+            tableData[index.row()][index.column()].setTextColor(value.value<QColor>());
+            Q_EMIT dataChanged(index, index, {Qt::DisplayRole, Qt::ForegroundRole});
+            return true;
+        case Qt::TextAlignmentRole:
+            tableData[index.row()][index.column()].setTextAlignment(value.value<Qt::Alignment>());
+            Q_EMIT dataChanged(index, index, {Qt::DisplayRole, Qt::TextAlignmentRole});
+            return true;
+        case Qt::FontRole:
+            tableData[index.row()][index.column()].setFont(value.value<QFont>());
+            Q_EMIT dataChanged(index, index, {Qt::DisplayRole, Qt::FontRole});
+            return true;
+        case Qt::UserRole:
+            tableData[index.row()][index.column()].setIsFormula(value.value<bool>());
+            if (value.value<bool>())
+                tableData[index.row()][index.column()].setDisplayText(
+                        formulaInterp.interpret(tableData[index.row()][index.column()].getInnerText()));
+            else
+                tableData[index.row()][index.column()].setDisplayText(tableData[index.row()][index.column()].getInnerText());
+            Q_EMIT dataChanged(index, index, {Qt::DisplayRole, Qt::EditRole});
+            return true;
+        default:
+            return false;
     }
 
 }

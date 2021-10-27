@@ -17,5 +17,6 @@
         <file>icons/boldFont.png</file>
         <file>icons/italicsFont.png</file>
         <file>icons/strikethroughFont.png</file>
+        <file>icons/formula.png</file>
     </qresource>
 </RCC>

@@ -1,6 +1,11 @@
 #include <cmath>
 #include <limits>
 #include "CellFormulaVisitor.h"
+#include "tablemodel.h"
+
+CellFormulaVisitor::CellFormulaVisitor(TableModel *table) : table(table)
+{
+}
 
 antlrcpp::Any CellFormulaVisitor::visitStart(CellExpressionParser::StartContext *ctx) {
     return visit(ctx->expr());
@@ -48,6 +53,13 @@ antlrcpp::Any CellFormulaVisitor::visitPow(CellExpressionParser::PowContext *ctx
     return pow(left, right);
 }
 
+antlrcpp::Any CellFormulaVisitor::visitCellName(CellExpressionParser::CellNameContext *ctx) {
+    double value;
+    table->data(QModelIndex(), Qt::UserRole);
+    value = 1;
+    return value;
+}
+
 antlrcpp::Any CellFormulaVisitor::visitMmaxOrMmin(CellExpressionParser::MmaxOrMminContext *ctx) {
     auto expressions = ctx->expr();
     if (ctx->op->getType() == CellExpressionParser::MMAX)
@@ -73,5 +85,4 @@ antlrcpp::Any CellFormulaVisitor::visitMmaxOrMmin(CellExpressionParser::MmaxOrMm
         return min;
     }
 }
-
 

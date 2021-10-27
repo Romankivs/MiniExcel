@@ -6,7 +6,9 @@
 #include <QSize>
 #include <QFile>
 #include <QMessageBox>
+#include <QVariant>
 #include "cell.h"
+#include "CellFormulaInterpreter.h"
 
 class TableModel : public QAbstractTableModel
 {
@@ -34,6 +36,7 @@ private:
     QString numberToColumnName(int num) const;
     QSize tableSize;
     QVector<QVector<cell>> tableData;
+    CellFormulaInterpreter formulaInterp;
 };
 
 #endif // TABLEMODEL_H
