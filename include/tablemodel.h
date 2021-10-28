@@ -32,8 +32,9 @@ public:
     void setTableSize(const QSize &newTableSize);
     QVector<QVector<cell>>& getTableData();
     void setTableData(const QVector<QVector<cell> > &newTableData);
-private:
     QString numberToColumnName(int num) const;
+    int columnNameToNumber(QString columnName);
+private:
     QSize tableSize;
     QVector<QVector<cell>> tableData;
     CellFormulaInterpreter formulaInterp;

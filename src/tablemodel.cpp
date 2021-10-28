@@ -239,6 +239,17 @@ QString TableModel::numberToColumnName(int num) const
     return result;
 }
 
+int TableModel::columnNameToNumber(QString columnName) {
+    std::string str = columnName.toStdString();
+    int result = 0;
+    std::reverse(str.begin(), str.end());
+    for (int i = 0; i< str.size(); ++i)
+    {
+        result += pow(26,i) * (char)(str[i] - 'A');
+    }
+    return result;
+}
+
 void TableModel::setTableData(const QVector<QVector<cell> > &newTableData)
 {
     tableData = newTableData;
@@ -253,4 +264,6 @@ void TableModel::setTableSize(const QSize &newTableSize)
 {
     tableSize = newTableSize;
 }
+
+
 

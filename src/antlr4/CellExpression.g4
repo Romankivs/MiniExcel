@@ -27,8 +27,8 @@ MUL:  '*';
 DIV:  '/';
 ADD:  '+';
 SUB:  '-';
+CELL_NAME: [A-Z]+[0-9]+;
 NUMBER: (R_INT|R_FLOAT);
-CELL_NAME: [A-Z]+[0-9]*;
 
 fragment R_INT: DIGIT+;
 fragment R_FLOAT: DIGIT+'.'DIGIT*

@@ -29,13 +29,11 @@ antlrcpp::Any CellFormulaVisitor::visitParanthesis(CellExpressionParser::Paranth
 }
 
 antlrcpp::Any CellFormulaVisitor::visitUnaryMinOrPlus(CellExpressionParser::UnaryMinOrPlusContext *ctx) {
+    double res = visit(ctx->expr());
     if (ctx->op->getType() == CellExpressionParser::ADD)
-        return visit(ctx->expr());
+        return res;
     else
-    {
-        double res = visit(ctx->expr());
         return res * -1;
-    }
 }
 
 antlrcpp::Any CellFormulaVisitor::visitMulOrDiv(CellExpressionParser::MulOrDivContext *ctx) {
@@ -54,9 +52,17 @@ antlrcpp::Any CellFormulaVisitor::visitPow(CellExpressionParser::PowContext *ctx
 }
 
 antlrcpp::Any CellFormulaVisitor::visitCellName(CellExpressionParser::CellNameContext *ctx) {
-    double value;
-    table->data(QModelIndex(), Qt::UserRole);
-    value = 1;
+    std::string cellName = ctx->CELL_NAME()->getText().c_str();
+    size_t columnLast = cellName.find_first_of("0123456789");
+    QString columnName = QString::fromStdString(cellName.substr(0, columnLast));
+    QString rowName = QString::fromStdString(cellName.substr(columnLast));
+    int columnIndex = table->columnNameToNumber(columnName);
+    int rowIndex = rowName.toInt();
+
+    double value = 0;
+    QVariant cellVal = table->data(table->index(rowIndex, columnIndex), Qt::EditRole);
+    if (cellVal.isValid())
+        value = cellVal.toDouble();
     return value;
 }
 
