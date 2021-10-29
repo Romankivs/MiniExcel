@@ -139,10 +139,10 @@ bool TableModel::setData(const QModelIndex &index, const QVariant &value, int ro
             recomputeCell(index);
             return true;
         case AddRoles::Dependent:
-            tableData[index.row()][index.column()].dependentCells = value.value<QVector<QSize>>();
+            tableData[index.row()][index.column()].dependentCells = value.value<QVector<CellIndex>>();
             return true;
         case AddRoles::DependsOn:
-            tableData[index.row()][index.column()].cellsThatThisDependsOn = value.value<QVector<QSize>>();
+            tableData[index.row()][index.column()].cellsThatThisDependsOn = value.value<QVector<CellIndex>>();
             return true;
         default:
             return false;
@@ -250,9 +250,10 @@ int TableModel::columnNameToNumber(QString columnName) {
     return result;
 }
 
-void TableModel::recomputeCell(const QModelIndex &index, QVector<QSize> alreadyVisited)
+void TableModel::recomputeCell(const QModelIndex &index, QVector<CellIndex> alreadyVisited)
 {
-    alreadyVisited.push_back(QSize(index.column(), index.row()));
+    alreadyVisited.push_back(CellIndex(index.row(), index.column()));
+    std::cerr << alreadyVisited.size() << std::endl;
     QString innerValue = tableData[index.row()][index.column()].innerText;
     if (tableData[index.row()][index.column()].isFormula)
     {
@@ -262,16 +263,18 @@ void TableModel::recomputeCell(const QModelIndex &index, QVector<QSize> alreadyV
     else
         tableData[index.row()][index.column()].displayText = innerValue;
     Q_EMIT dataChanged(index, index, {Qt::DisplayRole});
-    QVector<QSize> dependentCells = tableData[index.row()][index.column()].dependentCells;
-    for (auto& c : dependentCells)
+    QVector<CellIndex> dependentCells = tableData[index.row()][index.column()].dependentCells;
+    std::cerr << "dependent size" << dependentCells.size() << std::endl;
+    for (CellIndex& c : dependentCells)
     {
+        std::cerr << "~" << c.row << ", " << c.column << ": " << alreadyVisited.contains(c) << std::endl;
         if (alreadyVisited.contains(c))
         {
             tableData[index.row()][index.column()].displayText = QString("Circular dependency");
         }
         else
         {
-            recomputeCell(this->index(c.height(), c.width()), alreadyVisited);
+            recomputeCell(this->index(c.row, c.column), alreadyVisited);
         }
     }
 }
@@ -280,9 +283,9 @@ void TableModel::clearDependenciesFromCellsItDependsFrom(const QModelIndex& inde
 {
     for (auto& c : tableData[index.row()][index.column()].cellsThatThisDependsOn)
     {
-        QVector<QSize> dependentCells = data(this->index(c.height(), c.width()), AddRoles::Dependent).value<QVector<QSize>>();
-        dependentCells.removeAll(QSize(index.column(), index.row()));
-        setData(this->index(c.height(), c.width()), QVariant::fromValue(dependentCells), AddRoles::Dependent);
+        QVector<CellIndex> dependentCells = tableData[c.row][c.column].dependentCells;
+        dependentCells.removeAll(CellIndex(index.row(), index.column()));
+        tableData[c.row][c.column].dependentCells = dependentCells;
     }
 }
 

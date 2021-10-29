@@ -60,14 +60,15 @@ antlrcpp::Any CellFormulaVisitor::visitCellName(CellExpressionParser::CellNameCo
     int columnIndex = table->columnNameToNumber(columnName);
     int rowIndex = rowName.toInt();
 
-    QVector<QSize> dependentCells = table->data(table->index(rowIndex, columnIndex), AddRoles::Dependent).value<QVector<QSize>>();
-    if (!dependentCells.contains(QSize(interpretedCellIndex.column(), interpretedCellIndex.row())))
-        dependentCells.push_back(QSize(interpretedCellIndex.column(), interpretedCellIndex.row()));
+    QVector<CellIndex> dependentCells = table->data(table->index(rowIndex, columnIndex),
+                                                    AddRoles::Dependent).value<QVector<CellIndex>>();
+    if (!dependentCells.contains(CellIndex(interpretedCellIndex.row(), interpretedCellIndex.column())))
+        dependentCells.push_back(CellIndex(interpretedCellIndex.row(), interpretedCellIndex.column()));
     table->setData(table->index(rowIndex, columnIndex), QVariant::fromValue(dependentCells), AddRoles::Dependent);
 
-    QVector<QSize> dependsOnCells = table->data(table->index(rowIndex, columnIndex), AddRoles::DependsOn).value<QVector<QSize>>();
-    if (!dependsOnCells.contains(QSize(columnIndex, rowIndex)))
-        dependsOnCells.push_back(QSize(columnIndex, rowIndex));
+    QVector<CellIndex> dependsOnCells = table->data(table->index(rowIndex, columnIndex), AddRoles::DependsOn).value<QVector<CellIndex>>();
+    if (!dependsOnCells.contains(CellIndex(rowIndex, columnIndex)))
+        dependsOnCells.push_back(CellIndex(rowIndex, columnIndex));
     table->setData(interpretedCellIndex, QVariant::fromValue(dependsOnCells), AddRoles::DependsOn);
 
     double value = 0;

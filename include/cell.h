@@ -8,28 +8,28 @@
 #include <QSize>
 #include <QModelIndex>
 
+struct CellIndex
+{
+    CellIndex() = default;
+    CellIndex(int row, int column) : row(row), column(column) {}
+    bool operator==(const CellIndex& other) const = default;
+    int row;
+    int column;
+};
+QDataStream& operator<<(QDataStream& stream, const CellIndex& idx);
+QDataStream& operator>>(QDataStream& stream, CellIndex& idx);
+
 class cell
 {
 public:
     cell() = default;
     cell(QString innerText, QString displayText, Qt::Alignment textAlignment, QFont font,
-         QColor backgroundColor, QColor textColor, bool isFormula, QVector<QModelIndex> dependentCells,
-         QVector<QModelIndex> cellsThatThisDependsOn);
+         QColor backgroundColor, QColor textColor, bool isFormula, QVector<CellIndex> dependentCells,
+         QVector<CellIndex> cellsThatThisDependsOn);
     ~cell() = default;
     cell(const cell& other) = default;
     cell& operator=(const cell& other) = default;
-    bool operator==(const cell& other) const
-    {
-        return (innerText == other.innerText &&
-               displayText == other.displayText &&
-               textAlignment == other.textAlignment &&
-               font == other.font &&
-               backgroundColor == other.backgroundColor &&
-               textColor == other.textColor &&
-               isFormula == other.isFormula &&
-               dependentCells == other.dependentCells &&
-               cellsThatThisDependsOn == other.cellsThatThisDependsOn);
-    }
+    bool operator==(const cell& other) const = default;
 
     friend QDataStream& operator<<(QDataStream& stream, const cell&);
     friend QDataStream& operator>>(QDataStream& stream, cell&);
@@ -41,8 +41,8 @@ public:
     QColor backgroundColor = QColor(255, 255, 255);
     QColor textColor = QColor(0, 0, 0);
     bool isFormula = false;
-    QVector<QModelIndex> dependentCells;
-    QVector<QModelIndex> cellsThatThisDependsOn;
+    QVector<CellIndex> dependentCells;
+    QVector<CellIndex> cellsThatThisDependsOn;
 };
 
 // Serialization functions
