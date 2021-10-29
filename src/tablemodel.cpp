@@ -63,19 +63,23 @@ QVariant TableModel::data(const QModelIndex &index, int role) const
     switch(role)
     {
         case Qt::DisplayRole:
-            return tableData[index.row()][index.column()].getDisplayText();
+            return tableData[index.row()][index.column()].displayText;
         case Qt::EditRole:
-            return tableData[index.row()][index.column()].getInnerText();
+            return tableData[index.row()][index.column()].innerText;
         case Qt::BackgroundRole:
-            return tableData[index.row()][index.column()].getBackgroundColor();
+            return tableData[index.row()][index.column()].backgroundColor;
         case Qt::ForegroundRole:
-            return tableData[index.row()][index.column()].getTextColor();
+            return tableData[index.row()][index.column()].textColor;
         case Qt::TextAlignmentRole:
-            return QVariant::fromValue(tableData[index.row()][index.column()].getTextAlignment());
+            return QVariant::fromValue(tableData[index.row()][index.column()].textAlignment);
         case Qt::FontRole:
-            return tableData[index.row()][index.column()].getFont();
-        case Qt::UserRole:
-            return tableData[index.row()][index.column()].getIsFormula();
+            return tableData[index.row()][index.column()].font;
+        case AddRoles::Formula:
+            return tableData[index.row()][index.column()].isFormula;
+        case AddRoles::Dependent:
+            return QVariant::fromValue(tableData[index.row()][index.column()].dependentCells);
+        case AddRoles::DependsOn:
+            return QVariant::fromValue(tableData[index.row()][index.column()].cellsThatThisDependsOn);
         default:
             return QVariant();
     }
@@ -109,40 +113,36 @@ bool TableModel::setData(const QModelIndex &index, const QVariant &value, int ro
     switch(role)
     {
         case Qt::EditRole:
-            if (tableData[index.row()][index.column()].getIsFormula())
-            {
-                QString valueToStr = value.toString();
-                tableData[index.row()][index.column()].setDisplayText(formulaInterp.interpret(valueToStr));
-            }
-            else
-                tableData[index.row()][index.column()].setDisplayText(value.toString());
-            tableData[index.row()][index.column()].setInnerText(value.toString());
-            Q_EMIT dataChanged(index, index, {Qt::DisplayRole, Qt::EditRole});
+            tableData[index.row()][index.column()].innerText = value.toString();
+            clearDependenciesFromCellsItDependsFrom(index);
+            Q_EMIT dataChanged(index, index, {Qt::EditRole});
+            recomputeCell(index);
             return true;
         case Qt::BackgroundRole:
-            tableData[index.row()][index.column()].setBackgroundColor(value.value<QColor>());
+            tableData[index.row()][index.column()].backgroundColor = value.value<QColor>();
             Q_EMIT dataChanged(index, index, {Qt::DisplayRole, Qt::BackgroundRole});
             return true;
         case Qt::ForegroundRole:
-            tableData[index.row()][index.column()].setTextColor(value.value<QColor>());
+            tableData[index.row()][index.column()].textColor = value.value<QColor>();
             Q_EMIT dataChanged(index, index, {Qt::DisplayRole, Qt::ForegroundRole});
             return true;
         case Qt::TextAlignmentRole:
-            tableData[index.row()][index.column()].setTextAlignment(value.value<Qt::Alignment>());
+            tableData[index.row()][index.column()].textAlignment = value.value<Qt::Alignment>();
             Q_EMIT dataChanged(index, index, {Qt::DisplayRole, Qt::TextAlignmentRole});
             return true;
         case Qt::FontRole:
-            tableData[index.row()][index.column()].setFont(value.value<QFont>());
+            tableData[index.row()][index.column()].font = value.value<QFont>();
             Q_EMIT dataChanged(index, index, {Qt::DisplayRole, Qt::FontRole});
             return true;
-        case Qt::UserRole:
-            tableData[index.row()][index.column()].setIsFormula(value.value<bool>());
-            if (value.value<bool>())
-                tableData[index.row()][index.column()].setDisplayText(
-                        formulaInterp.interpret(tableData[index.row()][index.column()].getInnerText()));
-            else
-                tableData[index.row()][index.column()].setDisplayText(tableData[index.row()][index.column()].getInnerText());
-            Q_EMIT dataChanged(index, index, {Qt::DisplayRole, Qt::EditRole});
+        case AddRoles::Formula:
+            tableData[index.row()][index.column()].isFormula = value.value<bool>();
+            recomputeCell(index);
+            return true;
+        case AddRoles::Dependent:
+            tableData[index.row()][index.column()].dependentCells = value.value<QVector<QSize>>();
+            return true;
+        case AddRoles::DependsOn:
+            tableData[index.row()][index.column()].cellsThatThisDependsOn = value.value<QVector<QSize>>();
             return true;
         default:
             return false;
@@ -250,6 +250,43 @@ int TableModel::columnNameToNumber(QString columnName) {
     return result;
 }
 
+void TableModel::recomputeCell(const QModelIndex &index, QVector<QSize> alreadyVisited)
+{
+    alreadyVisited.push_back(QSize(index.column(), index.row()));
+    QString innerValue = tableData[index.row()][index.column()].innerText;
+    if (tableData[index.row()][index.column()].isFormula)
+    {
+        QString recomputedDisplayValue = formulaInterp.interpret(innerValue, index);
+        tableData[index.row()][index.column()].displayText = recomputedDisplayValue;
+    }
+    else
+        tableData[index.row()][index.column()].displayText = innerValue;
+    Q_EMIT dataChanged(index, index, {Qt::DisplayRole});
+    QVector<QSize> dependentCells = tableData[index.row()][index.column()].dependentCells;
+    for (auto& c : dependentCells)
+    {
+        if (alreadyVisited.contains(c))
+        {
+            tableData[index.row()][index.column()].displayText = QString("Circular dependency");
+        }
+        else
+        {
+            recomputeCell(this->index(c.height(), c.width()), alreadyVisited);
+        }
+    }
+}
+
+void TableModel::clearDependenciesFromCellsItDependsFrom(const QModelIndex& index)
+{
+    for (auto& c : tableData[index.row()][index.column()].cellsThatThisDependsOn)
+    {
+        QVector<QSize> dependentCells = data(this->index(c.height(), c.width()), AddRoles::Dependent).value<QVector<QSize>>();
+        dependentCells.removeAll(QSize(index.column(), index.row()));
+        setData(this->index(c.height(), c.width()), QVariant::fromValue(dependentCells), AddRoles::Dependent);
+    }
+}
+
+
 void TableModel::setTableData(const QVector<QVector<cell> > &newTableData)
 {
     tableData = newTableData;
@@ -264,6 +301,7 @@ void TableModel::setTableSize(const QSize &newTableSize)
 {
     tableSize = newTableSize;
 }
+
 
 
 

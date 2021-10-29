@@ -3,7 +3,8 @@
 #include "CellFormulaVisitor.h"
 #include "tablemodel.h"
 
-CellFormulaVisitor::CellFormulaVisitor(TableModel *table) : table(table)
+CellFormulaVisitor::CellFormulaVisitor(TableModel *table, QModelIndex curIndex) :
+    table(table), interpretedCellIndex(curIndex)
 {
 }
 
@@ -59,8 +60,18 @@ antlrcpp::Any CellFormulaVisitor::visitCellName(CellExpressionParser::CellNameCo
     int columnIndex = table->columnNameToNumber(columnName);
     int rowIndex = rowName.toInt();
 
+    QVector<QSize> dependentCells = table->data(table->index(rowIndex, columnIndex), AddRoles::Dependent).value<QVector<QSize>>();
+    if (!dependentCells.contains(QSize(interpretedCellIndex.column(), interpretedCellIndex.row())))
+        dependentCells.push_back(QSize(interpretedCellIndex.column(), interpretedCellIndex.row()));
+    table->setData(table->index(rowIndex, columnIndex), QVariant::fromValue(dependentCells), AddRoles::Dependent);
+
+    QVector<QSize> dependsOnCells = table->data(table->index(rowIndex, columnIndex), AddRoles::DependsOn).value<QVector<QSize>>();
+    if (!dependsOnCells.contains(QSize(columnIndex, rowIndex)))
+        dependsOnCells.push_back(QSize(columnIndex, rowIndex));
+    table->setData(interpretedCellIndex, QVariant::fromValue(dependsOnCells), AddRoles::DependsOn);
+
     double value = 0;
-    QVariant cellVal = table->data(table->index(rowIndex, columnIndex), Qt::EditRole);
+    QVariant cellVal = table->data(table->index(rowIndex, columnIndex), Qt::DisplayRole);
     if (cellVal.isValid())
         value = cellVal.toDouble();
     return value;

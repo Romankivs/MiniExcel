@@ -25,7 +25,7 @@ Window::Window()
     createActions();
     createToolBars();
 
-    antlr4::ANTLRInputStream input(std::string("1+3-"));
+    /*antlr4::ANTLRInputStream input(std::string("1+3-"));
     ExceptionCellExpressionListener errListener;
     antlr4::CellExpressionLexer lexer(&input);
     lexer.removeErrorListeners();
@@ -41,7 +41,7 @@ Window::Window()
     catch (std::runtime_error e)
     {
         QMessageBox::warning(this, "Warning", e.what());
-    }
+    }*/
     //QMessageBox::warning(this, "Warning", QString::number(result));
 }
 
@@ -85,7 +85,7 @@ void Window::selectionChanged(const QItemSelection &selected, const QItemSelecti
     Q_EMIT currentFontIsBoldChanged(changedFont.bold());
     Q_EMIT currentFontIsItalicChanged(changedFont.italic());
     Q_EMIT currentFontIsStrikethroughChanged(changedFont.strikeOut());
-    bool changedIsFormula = tableModel->data(lastSelected, Qt::UserRole).value<bool>();
+    bool changedIsFormula = tableModel->data(lastSelected, AddRoles::Formula).value<bool>();
     Q_EMIT currentIsFormulaChanged(changedIsFormula);
 }
 
@@ -165,7 +165,7 @@ void Window::isFormulaChanged(bool value)
         QModelIndexList selectedTableIndexes = tableView->selectionModel()->selectedIndexes();
         for (const auto& index : selectedTableIndexes)
         {
-            tableModel->setData(index, value, Qt::UserRole);
+            tableModel->setData(index, value, AddRoles::Formula);
         }
     }
 }

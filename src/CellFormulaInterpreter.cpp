@@ -4,7 +4,7 @@ CellFormulaInterpreter::CellFormulaInterpreter(TableModel *model) : model(model)
 {
 }
 
-QString CellFormulaInterpreter::interpret(QString string) const {
+QString CellFormulaInterpreter::interpret(QString string, QModelIndex curIndex) const {
     if (string.isEmpty())
         return QString("0");
     antlr4::ANTLRInputStream input(string.toStdString());
@@ -16,7 +16,7 @@ QString CellFormulaInterpreter::interpret(QString string) const {
     antlr4::CellExpressionParser parser(&tokens);
     parser.removeErrorListeners();
     parser.addErrorListener(&errListener);
-    CellFormulaVisitor visitor(model);
+    CellFormulaVisitor visitor(model, curIndex);
     try{
         double res = visitor.visit(parser.start());
         return QString::number(res);

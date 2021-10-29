@@ -1,5 +1,6 @@
 #pragma once
 #include "CellExpressionBaseVisitor.h"
+#include <QModelIndex>
 
 using namespace antlr4;
 
@@ -8,7 +9,7 @@ class TableModel;
 class CellFormulaVisitor : public CellExpressionBaseVisitor
 {
 public:
-    CellFormulaVisitor(TableModel* table);
+    CellFormulaVisitor(TableModel* table, QModelIndex curIndex);
 private:
     antlrcpp::Any visitStart(CellExpressionParser::StartContext *ctx) override;
     antlrcpp::Any visitAddOrSub(CellExpressionParser::AddOrSubContext *ctx) override;
@@ -21,4 +22,5 @@ private:
     antlrcpp::Any visitMmaxOrMmin(CellExpressionParser::MmaxOrMminContext *ctx) override;
 
     TableModel* table;
+    QModelIndex interpretedCellIndex;
 };

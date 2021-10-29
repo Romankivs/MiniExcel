@@ -9,7 +9,7 @@
 class CellFormulaInterpreter {
 public:
     explicit CellFormulaInterpreter(TableModel* model);
-    QString interpret(QString string) const;
+    QString interpret(QString string, QModelIndex curIndex) const;
 private:
     TableModel* model;
 };

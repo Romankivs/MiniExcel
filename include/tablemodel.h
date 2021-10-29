@@ -10,6 +10,13 @@
 #include "cell.h"
 #include "CellFormulaInterpreter.h"
 
+enum AddRoles
+{
+    Formula = Qt::UserRole,
+    Dependent,
+    DependsOn
+};
+
 class TableModel : public QAbstractTableModel
 {
     Q_OBJECT
@@ -28,6 +35,8 @@ public:
     bool removeRows(int position, int rows, const QModelIndex &index = QModelIndex()) override;
     bool insertColumns(int position, int columns, const QModelIndex &index = QModelIndex()) override;
     bool removeColumns(int position, int columns, const QModelIndex &index = QModelIndex()) override;
+    void recomputeCell(const QModelIndex& index, QVector<QSize> alreadyVisited = {});
+    void clearDependenciesFromCellsItDependsFrom(const QModelIndex& index);
     const QSize &getTableSize() const;
     void setTableSize(const QSize &newTableSize);
     QVector<QVector<cell>>& getTableData();

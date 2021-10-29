@@ -4,13 +4,17 @@
 #include <QString>
 #include <QFont>
 #include <QColor>
+#include <QVector>
+#include <QSize>
+#include <QModelIndex>
 
 class cell
 {
 public:
     cell() = default;
     cell(QString innerText, QString displayText, Qt::Alignment textAlignment, QFont font,
-         QColor backgroundColor, QColor textColor, bool isFormula);
+         QColor backgroundColor, QColor textColor, bool isFormula, QVector<QModelIndex> dependentCells,
+         QVector<QModelIndex> cellsThatThisDependsOn);
     ~cell() = default;
     cell(const cell& other) = default;
     cell& operator=(const cell& other) = default;
@@ -22,34 +26,14 @@ public:
                font == other.font &&
                backgroundColor == other.backgroundColor &&
                textColor == other.textColor &&
-               isFormula == other.isFormula);
+               isFormula == other.isFormula &&
+               dependentCells == other.dependentCells &&
+               cellsThatThisDependsOn == other.cellsThatThisDependsOn);
     }
-
-    const QString &getInnerText() const;
-    void setInnerText(const QString &newText);
-
-    const QString &getDisplayText() const;
-    void setDisplayText(const QString &newText);
-
-    const QFont &getFont() const;
-    void setFont(const QFont &newFont);
 
     friend QDataStream& operator<<(QDataStream& stream, const cell&);
     friend QDataStream& operator>>(QDataStream& stream, cell&);
 
-    const QColor &getBackgroundColor() const;
-    void setBackgroundColor(const QColor &newBackgroundColor);
-
-    const QColor &getTextColor() const;
-    void setTextColor(const QColor &newTextColor);
-
-    const Qt::Alignment &getTextAlignment() const;
-    void setTextAlignment(const Qt::Alignment &newTextAlignment);
-
-    bool getIsFormula() const;
-    void setIsFormula(bool value);
-
-private:
     QString innerText;
     QString displayText;
     Qt::Alignment textAlignment = Qt::AlignLeft | Qt::AlignVCenter;
@@ -57,6 +41,8 @@ private:
     QColor backgroundColor = QColor(255, 255, 255);
     QColor textColor = QColor(0, 0, 0);
     bool isFormula = false;
+    QVector<QModelIndex> dependentCells;
+    QVector<QModelIndex> cellsThatThisDependsOn;
 };
 
 // Serialization functions
