@@ -16,6 +16,7 @@
 #include <QSpinBox>
 #include <QToolButton>
 #include <QItemSelectionModel>
+#include <QLineEdit>
 #include <algorithm>
 #include "tablemodel.h"
 #include "MainToolBar/textAlignmentButtons.h"
@@ -40,6 +41,7 @@ Q_SIGNALS:
     void currentFontIsItalicChanged(bool italic);
     void currentFontIsStrikethroughChanged(bool strikethrough);
     void currentIsFormulaChanged(bool formula);
+    void currentInnerTextChanged(QString text);
 private Q_SLOTS:
     void verHeaderCustomContextMenu(const QPoint& point);
     void horHeaderCustomContextMenu(const QPoint& point);
@@ -48,6 +50,7 @@ private Q_SLOTS:
     void fontSizeChanged(int fontSize);
     void fontStyleChanged(FontStyleOptions style, bool value);
     void isFormulaChanged(bool value);
+    void innerTextChanged(QString text);
 private:
     void save();
     void saveAs();
@@ -67,6 +70,7 @@ private:
     void createColorToolButtons(QToolBar* toolBar);
     void createTextAlignmentToolButtons(QToolBar* toolBar);
     void createFontToolButtonsAndWidgets(QToolBar* toolBar);
+    void createInputLineEditWidget(QToolBar* toolBar);
     void about();
     TableModel* tableModel;
     QTableView* tableView;

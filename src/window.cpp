@@ -69,6 +69,8 @@ void Window::selectionChanged(const QItemSelection &selected, const QItemSelecti
     Q_EMIT currentFontIsStrikethroughChanged(changedFont.strikeOut());
     bool changedIsFormula = tableModel->data(lastSelected, AddRoles::Formula).value<bool>();
     Q_EMIT currentIsFormulaChanged(changedIsFormula);
+    QString changedInnerText = tableModel->data(lastSelected, Qt::EditRole).value<QString>();
+    Q_EMIT currentInnerTextChanged(changedInnerText);
 }
 
 void Window::fontChangedFromComboBox(const QFont &font)
@@ -151,6 +153,23 @@ void Window::isFormulaChanged(bool value)
         }
     }
 }
+
+void Window::innerTextChanged(QString text)
+{
+    if (!tableView->selectionModel()->hasSelection())
+    {
+        QMessageBox::warning(this, "Warning", "No indexes were selected!");
+    }
+    else
+    {
+        QModelIndexList selectedTableIndexes = tableView->selectionModel()->selectedIndexes();
+        for (const auto& index : selectedTableIndexes)
+        {
+            tableModel->setData(index, text, Qt::EditRole);
+        }
+    }
+}
+
 
 void Window::save()
 {
@@ -389,6 +408,12 @@ void Window::createToolBars()
     createColorToolButtons(mainToolBar);
     createTextAlignmentToolButtons(mainToolBar);
     createFontToolButtonsAndWidgets(mainToolBar);
+
+    QToolBar* inputToolBar = addToolBar("Input ToolBar");
+    inputToolBar->setAllowedAreas(Qt::AllToolBarAreas);
+    inputToolBar->setMovable(true);
+
+    createInputLineEditWidget(inputToolBar);
 }
 
 void Window::createTableRowsAndColumnsToolButtons(QToolBar* toolBar)
@@ -497,9 +522,27 @@ void Window::createFontToolButtonsAndWidgets(QToolBar *toolBar)
     formula->setCheckable(true);
 }
 
+void Window::createInputLineEditWidget(QToolBar *toolBar) {
+    auto* inputLineEdit = new QLineEdit;
+    toolBar->addWidget(inputLineEdit);
+    connect(this, &Window::currentInnerTextChanged, inputLineEdit, &QLineEdit::setText);
+    connect(inputLineEdit, &QLineEdit::textEdited, this, &Window::innerTextChanged);
+    connect(tableModel, &QAbstractTableModel::dataChanged, inputLineEdit, [this, inputLineEdit](
+            const QModelIndex& topLeft, const QModelIndex& bottomRight, const QList<int>& roles) {
+        if (roles.contains(Qt::EditRole))
+        {
+            QString newText = tableModel->data(topLeft, Qt::EditRole).value<QString>();
+            inputLineEdit->setText(newText);
+        }
+    });
+}
+
+
 void Window::about()
 {
     QMessageBox::about(this, "About Application",
              "MiniExcel is a very simple table viewer and editor ");
 }
+
+
 
