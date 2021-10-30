@@ -9,20 +9,21 @@
 #include <QVariant>
 #include "cell.h"
 #include "CellFormulaInterpreter.h"
+#include <optional>
 
 enum AddRoles
 {
     Formula = Qt::UserRole,
     Dependent,
-    DependsOn
+    DependsOn,
+    ExceptionState
 };
 
 class TableModel : public QAbstractTableModel
 {
     Q_OBJECT
 public:
-    TableModel(QObject* parent = nullptr);
-    TableModel(QVector<QVector<cell>>& tableData, QObject* parent = nullptr);
+    TableModel(const QVector<QVector<cell>>& tableData = {}, QObject* parent = nullptr);
     bool saveToFile(QString fileName);
     bool loadFromFile(QString fileName);
     int rowCount(const QModelIndex& parent) const override;
@@ -35,7 +36,7 @@ public:
     bool removeRows(int position, int rows, const QModelIndex &index = QModelIndex()) override;
     bool insertColumns(int position, int columns, const QModelIndex &index = QModelIndex()) override;
     bool removeColumns(int position, int columns, const QModelIndex &index = QModelIndex()) override;
-    void recomputeCell(const QModelIndex& index, QVector<CellIndex> alreadyVisited = {});
+    void recomputeCell(const QModelIndex& index, QVector<QModelIndex> alreadyVisited = {});
     void clearDependenciesFromCellsItDependsFrom(const QModelIndex& index);
     const QSize &getTableSize() const;
     void setTableSize(const QSize &newTableSize);

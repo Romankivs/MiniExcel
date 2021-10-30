@@ -4,6 +4,8 @@
 
 using namespace antlr4;
 
+constexpr double EPSILON = 1e-6;
+
 class TableModel;
 
 class CellFormulaVisitor : public CellExpressionBaseVisitor

@@ -43,7 +43,11 @@ antlrcpp::Any CellFormulaVisitor::visitMulOrDiv(CellExpressionParser::MulOrDivCo
     if (ctx->op->getType() == CellExpressionParser::MUL)
         return left * right;
     else
+    {
+        if (fabs(right - 0) <= EPSILON)
+            throw std::runtime_error("Division by 0");
         return left / right;
+    }
 }
 
 antlrcpp::Any CellFormulaVisitor::visitPow(CellExpressionParser::PowContext *ctx) {
@@ -60,21 +64,31 @@ antlrcpp::Any CellFormulaVisitor::visitCellName(CellExpressionParser::CellNameCo
     int columnIndex = table->columnNameToNumber(columnName);
     int rowIndex = rowName.toInt();
 
-    QVector<CellIndex> dependentCells = table->data(table->index(rowIndex, columnIndex),
-                                                    AddRoles::Dependent).value<QVector<CellIndex>>();
-    if (!dependentCells.contains(CellIndex(interpretedCellIndex.row(), interpretedCellIndex.column())))
-        dependentCells.push_back(CellIndex(interpretedCellIndex.row(), interpretedCellIndex.column()));
+    QVector<QPersistentModelIndex> dependentCells = table->data(table->index(rowIndex, columnIndex),
+                                                    AddRoles::Dependent).value<QVector<QPersistentModelIndex>>();
+    if (!dependentCells.contains(interpretedCellIndex))
+        dependentCells.push_back(interpretedCellIndex);
     table->setData(table->index(rowIndex, columnIndex), QVariant::fromValue(dependentCells), AddRoles::Dependent);
 
-    QVector<CellIndex> dependsOnCells = table->data(table->index(rowIndex, columnIndex), AddRoles::DependsOn).value<QVector<CellIndex>>();
-    if (!dependsOnCells.contains(CellIndex(rowIndex, columnIndex)))
-        dependsOnCells.push_back(CellIndex(rowIndex, columnIndex));
+    QVector<QModelIndex> dependsOnCells = table->data(interpretedCellIndex, AddRoles::DependsOn).value<QVector<QModelIndex>>();
+    if (!dependsOnCells.contains(table->index(rowIndex, columnIndex)))
+        dependsOnCells.push_back(table->index(rowIndex, columnIndex));
     table->setData(interpretedCellIndex, QVariant::fromValue(dependsOnCells), AddRoles::DependsOn);
+
+    if (table->data(table->index(rowIndex, columnIndex), AddRoles::ExceptionState).value<bool>())
+    {
+        throw std::runtime_error(table->data(table->index(rowIndex, columnIndex), Qt::DisplayRole).value<QString>().toStdString());
+    }
 
     double value = 0;
     QVariant cellVal = table->data(table->index(rowIndex, columnIndex), Qt::DisplayRole);
-    if (cellVal.isValid())
-        value = cellVal.toDouble();
+    if (cellVal.isValid() && !cellVal.toString().isEmpty()) {
+        bool ok;
+        value = cellVal.toDouble(&ok);
+        if (!ok) {
+            throw std::runtime_error("Wrong value type");
+        }
+    }
     return value;
 }
 

@@ -1,10 +1,6 @@
 #include "tablemodel.h"
 
-TableModel::TableModel(QObject *parent) : QAbstractTableModel(parent), formulaInterp(this)
-{
-}
-
-TableModel::TableModel(QVector<QVector<cell> > &tableData, QObject *parent) :
+TableModel::TableModel(const QVector<QVector<cell> > &tableData, QObject *parent) :
     QAbstractTableModel(parent), tableData(tableData), formulaInterp(this)
 {
     int width;
@@ -39,6 +35,13 @@ bool TableModel::loadFromFile(QString fileName)
     beginResetModel();
     in >> tableSize >> tableData;
     endResetModel();
+    for (size_t r = 0; r < rowCount(QModelIndex()); ++r)
+    {
+        for (size_t c = 0; c < columnCount(QModelIndex()); ++c)
+        {
+            recomputeCell(this->index(r, c));
+        }
+    }
     return true;
 }
 
@@ -80,6 +83,8 @@ QVariant TableModel::data(const QModelIndex &index, int role) const
             return QVariant::fromValue(tableData[index.row()][index.column()].dependentCells);
         case AddRoles::DependsOn:
             return QVariant::fromValue(tableData[index.row()][index.column()].cellsThatThisDependsOn);
+        case AddRoles::ExceptionState:
+            return tableData[index.row()][index.column()].inExceptionState;
         default:
             return QVariant();
     }
@@ -139,10 +144,13 @@ bool TableModel::setData(const QModelIndex &index, const QVariant &value, int ro
             recomputeCell(index);
             return true;
         case AddRoles::Dependent:
-            tableData[index.row()][index.column()].dependentCells = value.value<QVector<CellIndex>>();
+            tableData[index.row()][index.column()].dependentCells = value.value<QVector<QPersistentModelIndex>>();
             return true;
         case AddRoles::DependsOn:
-            tableData[index.row()][index.column()].cellsThatThisDependsOn = value.value<QVector<CellIndex>>();
+            tableData[index.row()][index.column()].cellsThatThisDependsOn = value.value<QVector<QModelIndex>>();
+            return true;
+        case AddRoles::ExceptionState:
+            tableData[index.row()][index.column()].inExceptionState = value.value<bool>();
             return true;
         default:
             return false;
@@ -168,18 +176,37 @@ bool TableModel::insertRows(int position, int rows, const QModelIndex &index)
 bool TableModel::removeRows(int position, int rows, const QModelIndex &index)
 {
     Q_UNUSED(index);
-    if (tableSize.height() == 1)
+    if (tableSize.height() - rows <= 0)
     {
         QMessageBox::critical(nullptr, "Error", "Last row can`t be deleted!");
         return false;
     }
+    QVector<QPersistentModelIndex> dependentCellsToUpdate;
     beginRemoveRows(QModelIndex(), position, position + rows - 1);
 
-    for (int row = 0; row < rows; ++row)
+    for (int row = 0; row < rows; ++row) {
+        const QVector<cell>& curRow = tableData[position];
+        for (size_t column = 0; column < curRow.size(); ++column)
+        {
+            for(auto c : curRow[column].dependentCells)
+            {
+                clearDependenciesFromCellsItDependsFrom(c);
+                if (!dependentCellsToUpdate.contains(c))
+                    dependentCellsToUpdate.push_back(c);
+            }
+        }
         tableData.removeAt(position);
+    }
     tableSize.rheight() -= rows;
 
     endRemoveRows();
+
+    for (auto c : dependentCellsToUpdate)
+    {
+        if (c.isValid()) // avoid recomputing already deleted
+            recomputeCell(c);
+    }
+
     return true;
 }
 
@@ -204,18 +231,35 @@ bool TableModel::insertColumns(int position, int columns, const QModelIndex &ind
 bool TableModel::removeColumns(int position, int columns, const QModelIndex &index)
 {
     Q_UNUSED(index);
-    if (tableSize.width() == 1)
+    if (tableSize.width() - columns <= 0)
     {
         QMessageBox::critical(nullptr, "Error", "Last column can`t be deleted!");
         return false;
     }
+
+    QVector<QPersistentModelIndex> dependentCellsToUpdate;
     beginRemoveColumns(QModelIndex(), position, position + columns - 1);
 
     for (int row = 0; row < tableSize.height(); ++row)
+    {
+        for (auto c : tableData[row][position].dependentCells)
+        {
+            clearDependenciesFromCellsItDependsFrom(c);
+            if (!dependentCellsToUpdate.contains(c))
+                dependentCellsToUpdate.push_back(c);
+        }
         tableData[row].removeAt(position);
+    }
     tableSize.rwidth() -= columns;
 
     endRemoveColumns();
+
+    for (const auto& c : dependentCellsToUpdate)
+    {
+        if (c.isValid()) // avoid recomputing already deleted
+            recomputeCell(c);
+    }
+
     return true;
 }
 
@@ -250,10 +294,9 @@ int TableModel::columnNameToNumber(QString columnName) {
     return result;
 }
 
-void TableModel::recomputeCell(const QModelIndex &index, QVector<CellIndex> alreadyVisited)
+void TableModel::recomputeCell(const QModelIndex &index, QVector<QModelIndex> alreadyVisited)
 {
-    alreadyVisited.push_back(CellIndex(index.row(), index.column()));
-    std::cerr << alreadyVisited.size() << std::endl;
+    alreadyVisited.push_back(index);
     QString innerValue = tableData[index.row()][index.column()].innerText;
     if (tableData[index.row()][index.column()].isFormula)
     {
@@ -263,18 +306,19 @@ void TableModel::recomputeCell(const QModelIndex &index, QVector<CellIndex> alre
     else
         tableData[index.row()][index.column()].displayText = innerValue;
     Q_EMIT dataChanged(index, index, {Qt::DisplayRole});
-    QVector<CellIndex> dependentCells = tableData[index.row()][index.column()].dependentCells;
-    std::cerr << "dependent size" << dependentCells.size() << std::endl;
-    for (CellIndex& c : dependentCells)
+    QVector<QPersistentModelIndex> dependentCells = tableData[index.row()][index.column()].dependentCells;
+    for (auto& c : dependentCells)
     {
-        std::cerr << "~" << c.row << ", " << c.column << ": " << alreadyVisited.contains(c) << std::endl;
         if (alreadyVisited.contains(c))
         {
             tableData[index.row()][index.column()].displayText = QString("Circular dependency");
+            tableData[index.row()][index.column()].inExceptionState = true;
+            if (alreadyVisited.count(c) == 1) // inform others about circular dependency
+                recomputeCell(c, alreadyVisited);
         }
         else
         {
-            recomputeCell(this->index(c.row, c.column), alreadyVisited);
+            recomputeCell(c, alreadyVisited);
         }
     }
 }
@@ -283,10 +327,13 @@ void TableModel::clearDependenciesFromCellsItDependsFrom(const QModelIndex& inde
 {
     for (auto& c : tableData[index.row()][index.column()].cellsThatThisDependsOn)
     {
-        QVector<CellIndex> dependentCells = tableData[c.row][c.column].dependentCells;
-        dependentCells.removeAll(CellIndex(index.row(), index.column()));
-        tableData[c.row][c.column].dependentCells = dependentCells;
+        if (data(c, AddRoles::Dependent).isValid()) {
+            QVector<QPersistentModelIndex> dependentCells = tableData[c.row()][c.column()].dependentCells;
+            dependentCells.removeAll(index);
+            tableData[c.row()][c.column()].dependentCells = dependentCells;
+        }
     }
+    tableData[index.row()][index.column()].cellsThatThisDependsOn = {};
 }
 
 

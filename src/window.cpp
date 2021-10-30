@@ -7,8 +7,9 @@
 
 Window::Window()
 {
-    QVector<QVector<cell>> tableInitData = {{{}, {}, {}}, {{}, {}, {}}};
-    tableModel = new TableModel(tableInitData);
+    tableModel = new TableModel();
+    tableModel->insertRows(0, 50);
+    tableModel->insertColumns(0, 50);
     tableView = new QTableView(this);
     tableView->setModel(tableModel);
     setCentralWidget(tableView);
@@ -24,25 +25,6 @@ Window::Window()
 
     createActions();
     createToolBars();
-
-    /*antlr4::ANTLRInputStream input(std::string("1+3-"));
-    ExceptionCellExpressionListener errListener;
-    antlr4::CellExpressionLexer lexer(&input);
-    lexer.removeErrorListeners();
-    lexer.addErrorListener(&errListener);
-    antlr4::CommonTokenStream tokens(&lexer);
-    antlr4::CellExpressionParser parser(&tokens);
-    parser.removeErrorListeners();
-    parser.addErrorListener(&errListener);
-    CellFormulaVisitor visitor(tableModel);
-    try {
-        double result = visitor.visit(parser.start());
-    }
-    catch (std::runtime_error e)
-    {
-        QMessageBox::warning(this, "Warning", e.what());
-    }*/
-    //QMessageBox::warning(this, "Warning", QString::number(result));
 }
 
 Window::~Window()

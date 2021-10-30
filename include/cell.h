@@ -7,25 +7,16 @@
 #include <QVector>
 #include <QSize>
 #include <QModelIndex>
-
-struct CellIndex
-{
-    CellIndex() = default;
-    CellIndex(int row, int column) : row(row), column(column) {}
-    bool operator==(const CellIndex& other) const = default;
-    int row;
-    int column;
-};
-QDataStream& operator<<(QDataStream& stream, const CellIndex& idx);
-QDataStream& operator>>(QDataStream& stream, CellIndex& idx);
+#include <QPersistentModelIndex>
+#include <optional>
 
 class cell
 {
 public:
     cell() = default;
     cell(QString innerText, QString displayText, Qt::Alignment textAlignment, QFont font,
-         QColor backgroundColor, QColor textColor, bool isFormula, QVector<CellIndex> dependentCells,
-         QVector<CellIndex> cellsThatThisDependsOn);
+         QColor backgroundColor, QColor textColor, bool isFormula, QVector<QPersistentModelIndex> dependentCells,
+         QVector<QModelIndex> cellsThatThisDependsOn, bool inExceptionState);
     ~cell() = default;
     cell(const cell& other) = default;
     cell& operator=(const cell& other) = default;
@@ -41,8 +32,9 @@ public:
     QColor backgroundColor = QColor(255, 255, 255);
     QColor textColor = QColor(0, 0, 0);
     bool isFormula = false;
-    QVector<CellIndex> dependentCells;
-    QVector<CellIndex> cellsThatThisDependsOn;
+    QVector<QPersistentModelIndex> dependentCells;
+    QVector<QModelIndex> cellsThatThisDependsOn;
+    bool inExceptionState = false;
 };
 
 // Serialization functions

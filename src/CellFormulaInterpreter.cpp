@@ -1,4 +1,5 @@
 #include "CellFormulaInterpreter.h"
+#include "tablemodel.h"
 
 CellFormulaInterpreter::CellFormulaInterpreter(TableModel *model) : model(model)
 {
@@ -23,6 +24,7 @@ QString CellFormulaInterpreter::interpret(QString string, QModelIndex curIndex) 
     }
     catch(std::runtime_error& e)
     {
+        model->setData(curIndex, true, AddRoles::ExceptionState);
         return QString(e.what());
     }
 }
