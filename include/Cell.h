@@ -9,6 +9,8 @@
 #include <QString>
 #include <QVector>
 #include <optional>
+#include <algorithm>
+#include <memory>
 
 class Cell {
 public:
@@ -19,7 +21,7 @@ public:
     ~Cell() = default;
     Cell(const Cell &other) = default;
     Cell &operator=(const Cell &other) = default;
-    bool operator==(const Cell &other) const = default;
+    bool operator==(const Cell &other) const;
 
     friend QDataStream &operator<<(QDataStream &stream, const Cell &);
     friend QDataStream &operator>>(QDataStream &stream, Cell &);

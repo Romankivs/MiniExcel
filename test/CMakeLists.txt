@@ -8,20 +8,35 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(QT NAMES Qt6 COMPONENTS Widgets REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Widgets REQUIRED)
 
+find_package(antlr4-runtime REQUIRED)
+find_package(antlr4-generator REQUIRED)
+
+# Set path to generator
+set(ANTLR4_JAR_LOCATION ../third/antlr4/antlr-4.9.2-complete.jar)
+
 ADD_DEFINITIONS(-DQT_NO_KEYWORDS)
+
+# generate combined grammar
+antlr4_generate(
+        cellExpressionGrammar
+        /home/sviat/CLionProjects/MiniExcel/antlr4/CellExpression.g4
+        BOTH                                # combined grammar
+        FALSE                               # do not generate listener
+        TRUE                                # generate visitor
+        "antlr4"                            # namespace
+)
 
 set(SRC_DIR ../src)
 set(INCLUDE_DIR ../include)
 
 set(PROJECT_SOURCES
         ${PROJECT_SOURCE_DIR}/main.cpp
-        ${PROJECT_SOURCE_DIR}/TableModelTest.cpp
         ${SRC_DIR}/Cell.cpp
         ${INCLUDE_DIR}/Cell.h
         ${SRC_DIR}/Window.cpp
@@ -64,9 +79,12 @@ else()
     endif()
 endif()
 
-target_link_libraries(MiniExcelCmake_test PRIVATE Qt${QT_VERSION_MAJOR}::Widgets gtest_main)
+# add required runtime library
+add_dependencies(MiniExcelCmake_test antlr4_shared )
 
-target_include_directories(MiniExcelCmake_test PUBLIC ../include)
+target_link_libraries(MiniExcelCmake_test PRIVATE Qt${QT_VERSION_MAJOR}::Widgets gtest_main antlr4_shared)
+
+target_include_directories(MiniExcelCmake_test PUBLIC ../include ${ANTLR4_INCLUDE_DIR} ${ANTLR4_INCLUDE_DIR_cellExpressionGrammar})
 
 enable_testing()
 
