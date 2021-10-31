@@ -1,8 +1,7 @@
 #include "CellFormulaInterpreter.h"
 #include "tablemodel.h"
 
-CellFormulaInterpreter::CellFormulaInterpreter(TableModel *model) : model(model)
-{
+CellFormulaInterpreter::CellFormulaInterpreter(TableModel *model) : model(model) {
 }
 
 QString CellFormulaInterpreter::interpret(QString string, QModelIndex curIndex) const {
@@ -18,12 +17,10 @@ QString CellFormulaInterpreter::interpret(QString string, QModelIndex curIndex) 
     parser.removeErrorListeners();
     parser.addErrorListener(&errListener);
     CellFormulaVisitor visitor(model, curIndex);
-    try{
+    try {
         double res = visitor.visit(parser.start());
         return QString::number(res);
-    }
-    catch(std::runtime_error& e)
-    {
+    } catch (std::runtime_error &e) {
         model->setData(curIndex, true, AddRoles::ExceptionState);
         return QString(e.what());
     }

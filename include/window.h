@@ -1,41 +1,40 @@
 #ifndef WINDOW_H
 #define WINDOW_H
 
+#include "InputToolBar/InputToolBar.h"
+#include "MainToolBar/MainToolBar.h"
+#include "tablemodel.h"
 #include <QApplication>
-#include <QMainWindow>
-#include <QMenuBar>
-#include <QTableView>
-#include <QHeaderView>
-#include <QMenu>
-#include <QToolBar>
 #include <QColorDialog>
-#include <QInputDialog>
 #include <QFileDialog>
-#include <QFontDialog>
 #include <QFontComboBox>
-#include <QSpinBox>
-#include <QToolButton>
+#include <QFontDialog>
+#include <QHeaderView>
+#include <QInputDialog>
 #include <QItemSelectionModel>
 #include <QLineEdit>
+#include <QMainWindow>
+#include <QMenu>
+#include <QMenuBar>
+#include <QSpinBox>
+#include <QTableView>
+#include <QToolBar>
+#include <QToolButton>
 #include <algorithm>
-#include "tablemodel.h"
-#include "MainToolBar/textAlignmentButtons.h"
 
-enum FontStyleOptions
-{
+enum FontStyleOptions {
     Bold,
     Italic,
     Strikethrough
 };
 
-class Window : public QMainWindow
-{
+class Window : public QMainWindow {
     Q_OBJECT
 public:
     explicit Window();
     ~Window();
 Q_SIGNALS:
-    void currentFontChanged(const QFont& font);
+    void currentFontChanged(const QFont &font);
     void currentFontSizeChanged(int fontSize);
     void currentFontIsBoldChanged(bool bold);
     void currentFontIsItalicChanged(bool italic);
@@ -43,14 +42,15 @@ Q_SIGNALS:
     void currentIsFormulaChanged(bool formula);
     void currentInnerTextChanged(QString text);
 private Q_SLOTS:
-    void verHeaderCustomContextMenu(const QPoint& point);
-    void horHeaderCustomContextMenu(const QPoint& point);
-    void selectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
-    void fontChangedFromComboBox(const QFont& font);
+    void verHeaderCustomContextMenu(const QPoint &point);
+    void horHeaderCustomContextMenu(const QPoint &point);
+    void selectionChanged(const QModelIndex &current, const QModelIndex &previous);
+    void fontChangedFromComboBox(const QFont &font);
     void fontSizeChanged(int fontSize);
     void fontStyleChanged(FontStyleOptions style, bool value);
     void isFormulaChanged(bool value);
-    void innerTextChanged(QString text);
+    void innerTextChanged(const QString& text);
+
 private:
     void save();
     void saveAs();
@@ -59,22 +59,16 @@ private:
     void removeRows();
     void addColumns();
     void removeColumns();
-    void chooseColor(const Qt::ItemDataRole& role);
+    void chooseColor(const Qt::ItemDataRole &role);
     void chooseHorizontalAlignment(const Qt::Alignment alignment);
     void chooseVerticalAlignment(const Qt::Alignment alignment);
     void changeFontDialog();
-    void changeSpinBoxValueWithoutSignaling(QSpinBox* spinBox, int value);
     void createActions();
     void createToolBars();
-    void createTableRowsAndColumnsToolButtons(QToolBar* toolBar);
-    void createColorToolButtons(QToolBar* toolBar);
-    void createTextAlignmentToolButtons(QToolBar* toolBar);
-    void createFontToolButtonsAndWidgets(QToolBar* toolBar);
-    void createInputLineEditWidget(QToolBar* toolBar);
     void about();
-    TableModel* tableModel;
-    QTableView* tableView;
+    TableModel *tableModel;
+    QTableView *tableView;
     QString openedFileName;
 };
 
-#endif // WINDOW_H
+#endif// WINDOW_H

@@ -1,11 +1,9 @@
-#include <cmath>
-#include <limits>
 #include "CellFormulaVisitor.h"
 #include "tablemodel.h"
+#include <cmath>
+#include <limits>
 
-CellFormulaVisitor::CellFormulaVisitor(TableModel *table, QModelIndex curIndex) :
-    table(table), interpretedCellIndex(curIndex)
-{
+CellFormulaVisitor::CellFormulaVisitor(TableModel *table, QModelIndex curIndex) : table(table), interpretedCellIndex(curIndex) {
 }
 
 antlrcpp::Any CellFormulaVisitor::visitStart(CellExpressionParser::StartContext *ctx) {
@@ -42,8 +40,7 @@ antlrcpp::Any CellFormulaVisitor::visitMulOrDiv(CellExpressionParser::MulOrDivCo
     double right = visit(ctx->right);
     if (ctx->op->getType() == CellExpressionParser::MUL)
         return left * right;
-    else
-    {
+    else {
         if (fabs(right - 0) <= EPSILON)
             throw std::runtime_error("Division by 0");
         return left / right;
@@ -65,7 +62,8 @@ antlrcpp::Any CellFormulaVisitor::visitCellName(CellExpressionParser::CellNameCo
     int rowIndex = rowName.toInt();
 
     QVector<QPersistentModelIndex> dependentCells = table->data(table->index(rowIndex, columnIndex),
-                                                    AddRoles::Dependent).value<QVector<QPersistentModelIndex>>();
+                                                                AddRoles::Dependent)
+                                                            .value<QVector<QPersistentModelIndex>>();
     if (!dependentCells.contains(interpretedCellIndex))
         dependentCells.push_back(interpretedCellIndex);
     table->setData(table->index(rowIndex, columnIndex), QVariant::fromValue(dependentCells), AddRoles::Dependent);
@@ -75,8 +73,7 @@ antlrcpp::Any CellFormulaVisitor::visitCellName(CellExpressionParser::CellNameCo
         dependsOnCells.push_back(table->index(rowIndex, columnIndex));
     table->setData(interpretedCellIndex, QVariant::fromValue(dependsOnCells), AddRoles::DependsOn);
 
-    if (table->data(table->index(rowIndex, columnIndex), AddRoles::ExceptionState).value<bool>())
-    {
+    if (table->data(table->index(rowIndex, columnIndex), AddRoles::ExceptionState).value<bool>()) {
         throw std::runtime_error(table->data(table->index(rowIndex, columnIndex), Qt::DisplayRole).value<QString>().toStdString());
     }
 
@@ -94,22 +91,17 @@ antlrcpp::Any CellFormulaVisitor::visitCellName(CellExpressionParser::CellNameCo
 
 antlrcpp::Any CellFormulaVisitor::visitMmaxOrMmin(CellExpressionParser::MmaxOrMminContext *ctx) {
     auto expressions = ctx->expr();
-    if (ctx->op->getType() == CellExpressionParser::MMAX)
-    {
+    if (ctx->op->getType() == CellExpressionParser::MMAX) {
         double max = std::numeric_limits<double>::min();
-        for (auto& expr : expressions)
-        {
+        for (auto &expr : expressions) {
             double num = visit(expr);
             if (num >= max)
                 max = num;
         }
         return max;
-    }
-    else
-    {
+    } else {
         double min = std::numeric_limits<double>::max();
-        for (auto& expr : expressions)
-        {
+        for (auto &expr : expressions) {
             double num = visit(expr);
             if (num <= min)
                 min = num;
@@ -117,4 +109,3 @@ antlrcpp::Any CellFormulaVisitor::visitMmaxOrMmin(CellExpressionParser::MmaxOrMm
         return min;
     }
 }
-

@@ -8,10 +8,10 @@ constexpr double EPSILON = 1e-6;
 
 class TableModel;
 
-class CellFormulaVisitor : public CellExpressionBaseVisitor
-{
+class CellFormulaVisitor : public CellExpressionBaseVisitor {
 public:
-    CellFormulaVisitor(TableModel* table, QModelIndex curIndex);
+    CellFormulaVisitor(TableModel *table, QModelIndex curIndex);
+
 private:
     antlrcpp::Any visitStart(CellExpressionParser::StartContext *ctx) override;
     antlrcpp::Any visitAddOrSub(CellExpressionParser::AddOrSubContext *ctx) override;
@@ -23,6 +23,6 @@ private:
     antlrcpp::Any visitCellName(CellExpressionParser::CellNameContext *ctx);
     antlrcpp::Any visitMmaxOrMmin(CellExpressionParser::MmaxOrMminContext *ctx) override;
 
-    TableModel* table;
+    TableModel *table;
     QModelIndex interpretedCellIndex;
 };

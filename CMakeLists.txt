@@ -46,10 +46,18 @@ set(PROJECT_SOURCES
         ${INCLUDE_DIR}/window.h
         ${SRC_DIR}/tablemodel.cpp
         ${INCLUDE_DIR}/tablemodel.h
-        ${SRC_DIR}/MainToolBar/textAlignmentButtons.cpp
-        ${INCLUDE_DIR}/MainToolBar/textAlignmentButtons.h
-        resourses.qrc
-        ${ANTLR4_SRC_FILES_cellExpressionGrammar} src/CellFormulaVisitor.cpp include/CellFormulaVisitor.h src/CellFormulaInterpreter.cpp include/CellFormulaInterpreter.h src/ExceptionCellExpressionListener.cpp include/ExceptionCellExpressionListener.h)
+        ${PROJECT_SOURCE_DIR}/resourses.qrc
+        ${ANTLR4_SRC_FILES_cellExpressionGrammar}
+        ${SRC_DIR}/CellFormulaVisitor.cpp
+        ${INCLUDE_DIR}/CellFormulaVisitor.h
+        ${SRC_DIR}/CellFormulaInterpreter.cpp
+        ${INCLUDE_DIR}/CellFormulaInterpreter.h
+        ${SRC_DIR}/ExceptionCellExpressionListener.cpp
+        ${INCLUDE_DIR}/ExceptionCellExpressionListener.h
+        ${SRC_DIR}/MainToolBar/MainToolBar.cpp
+        ${INCLUDE_DIR}/MainToolBar/MainToolBar.h
+        ${SRC_DIR}/InputToolBar/InputToolBar.cpp
+        ${INCLUDE_DIR}/InputToolBar/InputToolBar.h)
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(MiniExcelCmake
