@@ -356,5 +356,14 @@ void Window::createToolBars() {
 
 void Window::about() {
     QMessageBox::about(this, "About Application",
-                       "MiniExcel is a very simple table viewer and editor ");
+                       "MiniExcel is a very simple table viewer and editor\n"
+                       "Available operations:\n"
+                       "+x : unary plus\n"
+                       "-x : unary minus\n"
+                       "x+y : addition\n"
+                       "x-y : subtraction\n"
+                       "x*y : multiplication\n"
+                       "x/y : division\n"
+                       "mmin(x1,x2,...,xn) : minimum\n"
+                       "mmax(x1,x2,...,xn) : maximum ");
 }
