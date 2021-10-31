@@ -22,12 +22,12 @@ set(INCLUDE_DIR ../include)
 set(PROJECT_SOURCES
         ${PROJECT_SOURCE_DIR}/main.cpp
         ${PROJECT_SOURCE_DIR}/TableModelTest.cpp
-        ${SRC_DIR}/cell.cpp
-        ${INCLUDE_DIR}/cell.h
-        ${SRC_DIR}/window.cpp
-        ${INCLUDE_DIR}/window.h
-        ${SRC_DIR}/tablemodel.cpp
-        ${INCLUDE_DIR}/tablemodel.h
+        ${SRC_DIR}/Cell.cpp
+        ${INCLUDE_DIR}/Cell.h
+        ${SRC_DIR}/Window.cpp
+        ${INCLUDE_DIR}/Window.h
+        ${SRC_DIR}/TableModel.cpp
+        ${INCLUDE_DIR}/TableModel.h
         ../resourses.qrc
         ${ANTLR4_SRC_FILES_cellExpressionGrammar}
         ${SRC_DIR}/CellFormulaVisitor.cpp

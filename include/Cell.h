@@ -10,19 +10,19 @@
 #include <QVector>
 #include <optional>
 
-class cell {
+class Cell {
 public:
-    cell() = default;
-    cell(QString innerText, QString displayText, Qt::Alignment textAlignment, QFont font,
+    Cell() = default;
+    Cell(QString innerText, QString displayText, Qt::Alignment textAlignment, QFont font,
          QColor backgroundColor, QColor textColor, bool isFormula, QVector<QPersistentModelIndex> dependentCells,
          QVector<QModelIndex> cellsThatThisDependsOn, bool inExceptionState);
-    ~cell() = default;
-    cell(const cell &other) = default;
-    cell &operator=(const cell &other) = default;
-    bool operator==(const cell &other) const = default;
+    ~Cell() = default;
+    Cell(const Cell &other) = default;
+    Cell &operator=(const Cell &other) = default;
+    bool operator==(const Cell &other) const = default;
 
-    friend QDataStream &operator<<(QDataStream &stream, const cell &);
-    friend QDataStream &operator>>(QDataStream &stream, cell &);
+    friend QDataStream &operator<<(QDataStream &stream, const Cell &);
+    friend QDataStream &operator>>(QDataStream &stream, Cell &);
 
     QString innerText;
     QString displayText;
@@ -37,9 +37,9 @@ public:
 };
 
 // Serialization functions
-QDataStream &operator<<(QDataStream &stream, const cell &_cell);
-QDataStream &operator>>(QDataStream &stream, cell &_cell);
+QDataStream &operator<<(QDataStream &stream, const Cell &_cell);
+QDataStream &operator>>(QDataStream &stream, Cell &_cell);
 
-Q_DECLARE_METATYPE(cell);
+Q_DECLARE_METATYPE(Cell);
 
 #endif// CELL_H

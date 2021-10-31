@@ -1,13 +1,12 @@
-#include <gtest/gtest.h>
-#include "tablemodel.h"
-#include "cell.h"
-#include <QFileDialog>
+#include "TableModel.h"
+#include "Cell.h"
 #include <QFile>
+#include <QFileDialog>
+#include <gtest/gtest.h>
 
 using namespace testing;
 
-TEST(TableModelTest, saveAndLoadToFile)
-{
+TEST(TableModelTest, saveAndLoadToFile) {
     /*cell tableCell("Hello", Qt::AlignCenter, QFont("Arial"), QColor(0, 0, 0), QColor(255, 255, 255));
     QVector<QVector<cell>> tableInitData = {{tableCell, tableCell, {}}, {{}, {}, tableCell}};
     TableModel classUnderTest(tableInitData);
@@ -16,32 +15,28 @@ TEST(TableModelTest, saveAndLoadToFile)
 }
 
 
-TEST(TableModelTest, rowCountHandleNonEmptyTable)
-{
+TEST(TableModelTest, rowCountHandleNonEmptyTable) {
     QVector<QVector<cell>> tableInitData = {{{}, {}, {}}, {{}, {}, {}}};
     TableModel classUnderTest(tableInitData);
     size_t rowCount = classUnderTest.rowCount(QModelIndex());
     ASSERT_EQ(rowCount, 2);
 }
 
-TEST(TableModelTest, rowCountHandleEmptyTable)
-{
+TEST(TableModelTest, rowCountHandleEmptyTable) {
     QVector<QVector<cell>> tableInitData;
     TableModel classUnderTest(tableInitData);
     size_t rowCount = classUnderTest.rowCount(QModelIndex());
     ASSERT_EQ(rowCount, 0);
 }
 
-TEST(TableModelTest, columnCountHandleNonEmptyTable)
-{
+TEST(TableModelTest, columnCountHandleNonEmptyTable) {
     QVector<QVector<cell>> tableInitData = {{{}, {}, {}}, {{}, {}, {}}};
     TableModel classUnderTest(tableInitData);
     size_t columnCount = classUnderTest.columnCount(QModelIndex());
     ASSERT_EQ(columnCount, 3);
 }
 
-TEST(TableModelTest, columnCountHandleEmptyTable)
-{
+TEST(TableModelTest, columnCountHandleEmptyTable) {
     QVector<QVector<cell>> tableInitData;
     TableModel classUnderTest(tableInitData);
     size_t columnCount = classUnderTest.columnCount(QModelIndex());

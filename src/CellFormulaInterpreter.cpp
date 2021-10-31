@@ -1,5 +1,5 @@
 #include "CellFormulaInterpreter.h"
-#include "tablemodel.h"
+#include "TableModel.h"
 
 CellFormulaInterpreter::CellFormulaInterpreter(TableModel *model) : model(model) {
 }

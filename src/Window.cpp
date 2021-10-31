@@ -1,4 +1,4 @@
-#include "window.h"
+#include "Window.h"
 #include "CellFormulaVisitor.h"
 #include "ExceptionCellExpressionListener.h"
 

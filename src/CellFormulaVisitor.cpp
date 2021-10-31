@@ -1,5 +1,5 @@
 #include "CellFormulaVisitor.h"
-#include "tablemodel.h"
+#include "TableModel.h"
 #include <cmath>
 #include <limits>
 

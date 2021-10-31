@@ -1,6 +1,6 @@
-#include "tablemodel.h"
+#include "TableModel.h"
 
-TableModel::TableModel(const QVector<QVector<cell>> &tableData, QObject *parent) : QAbstractTableModel(parent), tableData(tableData), formulaInterp(this) {
+TableModel::TableModel(const QVector<QVector<Cell>> &tableData, QObject *parent) : QAbstractTableModel(parent), tableData(tableData), formulaInterp(this) {
     int width;
     int height = tableData.size();
     if (height == 0) {
@@ -143,7 +143,7 @@ bool TableModel::insertRows(int position, int rows, const QModelIndex &index) {
     beginInsertRows(QModelIndex(), position, position + rows - 1);
 
     for (int row = 0; row < rows; ++row) {
-        tableData.insert(position, QVector<cell>(tableSize.width()));
+        tableData.insert(position, QVector<Cell>(tableSize.width()));
     }
     tableSize.rheight() += rows;
 
@@ -161,7 +161,7 @@ bool TableModel::removeRows(int position, int rows, const QModelIndex &index) {
     beginRemoveRows(QModelIndex(), position, position + rows - 1);
 
     for (int row = 0; row < rows; ++row) {
-        const QVector<cell> &curRow = tableData[position];
+        const QVector<Cell> &curRow = tableData[position];
         for (size_t column = 0; column < curRow.size(); ++column) {
             for (auto c : curRow[column].dependentCells) {
                 clearDependenciesFromCellsItDependsFrom(c);
@@ -228,7 +228,7 @@ bool TableModel::removeColumns(int position, int columns, const QModelIndex &ind
     return true;
 }
 
-QVector<QVector<cell>> &TableModel::getTableData() {
+QVector<QVector<Cell>> &TableModel::getTableData() {
     return tableData;
 }
 
@@ -289,7 +289,7 @@ void TableModel::clearDependenciesFromCellsItDependsFrom(const QModelIndex &inde
 }
 
 
-void TableModel::setTableData(const QVector<QVector<cell>> &newTableData) {
+void TableModel::setTableData(const QVector<QVector<Cell>> &newTableData) {
     tableData = newTableData;
 }
 

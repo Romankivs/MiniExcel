@@ -1,8 +1,8 @@
 #ifndef TABLEMODEL_H
 #define TABLEMODEL_H
 
+#include "Cell.h"
 #include "CellFormulaInterpreter.h"
-#include "cell.h"
 #include <QAbstractTableModel>
 #include <QDebug>
 #include <QFile>
@@ -21,7 +21,7 @@ enum AddRoles {
 class TableModel : public QAbstractTableModel {
     Q_OBJECT
 public:
-    TableModel(const QVector<QVector<cell>> &tableData = {}, QObject *parent = nullptr);
+    TableModel(const QVector<QVector<Cell>> &tableData = {}, QObject *parent = nullptr);
     bool saveToFile(QString fileName);
     bool loadFromFile(QString fileName);
     int rowCount(const QModelIndex &parent) const override;
@@ -38,14 +38,14 @@ public:
     void clearDependenciesFromCellsItDependsFrom(const QModelIndex &index);
     const QSize &getTableSize() const;
     void setTableSize(const QSize &newTableSize);
-    QVector<QVector<cell>> &getTableData();
-    void setTableData(const QVector<QVector<cell>> &newTableData);
+    QVector<QVector<Cell>> &getTableData();
+    void setTableData(const QVector<QVector<Cell>> &newTableData);
     QString numberToColumnName(int num) const;
     int columnNameToNumber(QString columnName);
 
 private:
     QSize tableSize;
-    QVector<QVector<cell>> tableData;
+    QVector<QVector<Cell>> tableData;
     CellFormulaInterpreter formulaInterp;
 };
 

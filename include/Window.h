@@ -3,7 +3,7 @@
 
 #include "InputToolBar/InputToolBar.h"
 #include "MainToolBar/MainToolBar.h"
-#include "tablemodel.h"
+#include "TableModel.h"
 #include <QApplication>
 #include <QColorDialog>
 #include <QFileDialog>
